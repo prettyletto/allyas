@@ -7,18 +7,6 @@ import (
 	"github.com/Prettyletto/Allyas/internal/utils"
 )
 
-type CommandCatalog interface {
-	ListCommandMeta() []CommandMeta
-	Resolve(name string) (Command, bool)
-}
-
-type CommandMeta struct {
-	Name        string
-	Aliases     []string
-	Usage       string
-	Description string
-}
-
 type HelpCommand struct {
 	catalog CommandCatalog
 }

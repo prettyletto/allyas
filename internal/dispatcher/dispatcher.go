@@ -31,12 +31,6 @@ func (ErrNoCommand) Error() string {
 type Dispatcher struct {
 	Commands map[string]commands.Command
 }
-type CommandMeta struct {
-	Name        string
-	Aliases     []string
-	Usage       string
-	Description string
-}
 
 func NewDispatcher(cmds []commands.Command) (*Dispatcher, error) {
 	lookup := make(map[string]commands.Command)
@@ -105,16 +99,16 @@ func (d *Dispatcher) Dispatch(ctx commands.CommandContext, rawArgs []string) err
 
 }
 
-func (d *Dispatcher) ListCommandMeta() []CommandMeta {
+func (d *Dispatcher) ListCommandMeta() []commands.CommandMeta {
 	seen := make(map[string]bool)
-	cmetas := []CommandMeta{}
+	cmetas := []commands.CommandMeta{}
 	for _, v := range d.Commands {
 		canon := utils.NormalizeName(v.Names()[0])
 		_, ok := seen[canon]
 		if ok {
 			continue
 		}
-		entry := CommandMeta{
+		entry := commands.CommandMeta{
 			Name:        canon,
 			Aliases:     utils.NormalizeSlice(v.Names()),
 			Usage:       v.Usage(),
@@ -128,4 +122,26 @@ func (d *Dispatcher) ListCommandMeta() []CommandMeta {
 	})
 
 	return cmetas
+}
+
+func (d *Dispatcher) Register(cmd commands.Command) error {
+	names := cmd.Names()
+	if len(names) == 0 {
+		return fmt.Errorf("command has no names")
+	}
+
+	normalized := make([]string, 0, len(names))
+	for _, name := range names {
+		n := utils.NormalizeName(name)
+		if _, ok := d.Commands[n]; ok {
+			return fmt.Errorf("command name already registered: %q", n)
+		}
+		normalized = append(normalized, n)
+	}
+
+	for _, n := range normalized {
+		d.Commands[n] = cmd
+	}
+
+	return nil
 }
