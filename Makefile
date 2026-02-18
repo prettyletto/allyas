@@ -1,6 +1,6 @@
 
 BINARY_NAME = allyas
-SRC_DIR = cmd
+SRC_DIR = cmd/allyas
 
 .DEFAULT_GOAL := all
 
@@ -10,7 +10,7 @@ all: build
 
 build:
 	@echo "Building the $(BINARY_NAME) binary..."
-	go build -o $(BINARY_NAME) $(SRC_DIR)/main.go
+	go build -o $(BINARY_NAME) ./$(SRC_DIR)
 
 clean:
 	@echo "Cleaning up..."
@@ -42,5 +42,4 @@ help:
 	@echo "  install    - Install the binary globally"
 	@echo "  run        - Run the application"
 	@echo "  help       - Show this help message"
-
 

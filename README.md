@@ -3,6 +3,19 @@
 
 Alias Manager is a simple CLI tool written in Go that helps you manage your shell aliases. It allows you to store aliases in an `ally_aliases` file and source them into your default shell configuration file. The tool automatically detects the shell you're using by checking the `$SHELL` environment variable.
 
+## Project Structure
+
+The codebase follows an internal layered layout:
+
+- `cmd/allyas`: entrypoint and dependency wiring
+- `internal/cli/commands`: CLI command contracts and command handlers
+- `internal/app/dispatch`: command dispatch orchestration
+- `internal/domain/models`: core entities and domain models
+- `internal/infra/storage`: storage/path adapters
+- `internal/shared/text`: cross-cutting text normalization helpers
+
+Placement and responsibility rules are documented in `docs/ARCHITECTURE_MAP.md`.
+
 ## Installation
 
 ### Requirements
@@ -104,6 +117,5 @@ allyas remove my_alias
 This will delete the `my_alias` entry from the `ally_aliases` file.
 
 ---
-
 
 

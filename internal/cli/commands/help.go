@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/utils"
+	"github.com/Prettyletto/Allyas/internal/shared/text"
 )
 
 type HelpCommand struct {
@@ -42,8 +42,8 @@ func (h *HelpCommand) printAll() error {
 	fmt.Println("Commands: ")
 
 	for _, m := range metas {
-		name := utils.NormalizeName(m.Name)
-		aliases := utils.NormalizeSlice(m.Aliases)
+		name := text.NormalizeName(m.Name)
+		aliases := text.NormalizeSlice(m.Aliases)
 
 		fmt.Printf(" %-12s %s\n", name, m.Usage)
 		if len(aliases) > 0 {
@@ -62,7 +62,7 @@ func (h *HelpCommand) printAll() error {
 }
 
 func (h *HelpCommand) printOne(target string) error {
-	normalized := utils.NormalizeName(target)
+	normalized := text.NormalizeName(target)
 	cmd, ok := h.catalog.Resolve(normalized)
 	if !ok {
 		return fmt.Errorf("unknown command %q", normalized)
@@ -73,7 +73,7 @@ func (h *HelpCommand) printOne(target string) error {
 
 	aliases := cmd.Names()
 	if len(aliases) > 0 {
-		a := utils.NormalizeSlice(aliases)
+		a := text.NormalizeSlice(aliases)
 
 		if len(a) > 0 {
 			fmt.Printf("Aliases: %s\n", strings.Join(a, ", "))

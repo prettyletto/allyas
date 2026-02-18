@@ -1,12 +1,12 @@
-package dispatcher
+package dispatch
 
 import (
 	"fmt"
 	"sort"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/commands"
-	"github.com/Prettyletto/Allyas/internal/utils"
+	"github.com/Prettyletto/Allyas/internal/cli/commands"
+	"github.com/Prettyletto/Allyas/internal/shared/text"
 )
 
 type ErrUnknownCommand struct {
@@ -43,7 +43,7 @@ func NewDispatcher(cmds []commands.Command) (*Dispatcher, error) {
 		}
 
 		for _, name := range names {
-			normalizedName := utils.NormalizeName(name)
+			normalizedName := text.NormalizeName(name)
 			entry, ok := lookup[normalizedName]
 			if ok {
 				return nil, fmt.Errorf("The alias/name %q is already used by another command %v", normalizedName, entry.Names())
@@ -55,7 +55,7 @@ func NewDispatcher(cmds []commands.Command) (*Dispatcher, error) {
 }
 
 func (d *Dispatcher) Resolve(name string) (commands.Command, bool) {
-	normalizedName := utils.NormalizeName(name)
+	normalizedName := text.NormalizeName(name)
 	entry, ok := d.Commands[normalizedName]
 
 	if ok {
@@ -67,7 +67,7 @@ func (d *Dispatcher) Resolve(name string) (commands.Command, bool) {
 
 func (d *Dispatcher) listSuggestions(input string) []string {
 	var out []string
-	n := utils.NormalizeName(input)
+	n := text.NormalizeName(input)
 	for k := range d.Commands {
 		if strings.HasPrefix(k, n) {
 			out = append(out, k)
@@ -88,7 +88,7 @@ func (d *Dispatcher) Dispatch(ctx commands.CommandContext, rawArgs []string) err
 		return ErrNoCommand{}
 	}
 
-	sub := utils.NormalizeName(rawArgs[1])
+	sub := text.NormalizeName(rawArgs[1])
 	subArgs := rawArgs[2:]
 	cmd, ok := d.Resolve(sub)
 	if ok {
@@ -103,14 +103,14 @@ func (d *Dispatcher) ListCommandMeta() []commands.CommandMeta {
 	seen := make(map[string]bool)
 	cmetas := []commands.CommandMeta{}
 	for _, v := range d.Commands {
-		canon := utils.NormalizeName(v.Names()[0])
+		canon := text.NormalizeName(v.Names()[0])
 		_, ok := seen[canon]
 		if ok {
 			continue
 		}
 		entry := commands.CommandMeta{
 			Name:        canon,
-			Aliases:     utils.NormalizeSlice(v.Names()),
+			Aliases:     text.NormalizeSlice(v.Names()),
 			Usage:       v.Usage(),
 			Description: v.Description(),
 		}
@@ -132,7 +132,7 @@ func (d *Dispatcher) Register(cmd commands.Command) error {
 
 	normalized := make([]string, 0, len(names))
 	for _, name := range names {
-		n := utils.NormalizeName(name)
+		n := text.NormalizeName(name)
 		if _, ok := d.Commands[n]; ok {
 			return fmt.Errorf("command name already registered: %q", n)
 		}

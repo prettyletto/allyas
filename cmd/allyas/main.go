@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Prettyletto/Allyas/internal/commands"
-	"github.com/Prettyletto/Allyas/internal/dispatcher"
+	"github.com/Prettyletto/Allyas/internal/app/dispatch"
+	"github.com/Prettyletto/Allyas/internal/cli/commands"
 )
 
 func main() {
 	cmds := []commands.Command{}
 
-	d, err := dispatcher.NewDispatcher(cmds)
+	d, err := dispatch.NewDispatcher(cmds)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
