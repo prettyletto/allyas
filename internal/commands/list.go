@@ -24,3 +24,13 @@ func (c *ListCommand) Execute(ctx CommandContext, args []string) error {
 	fmt.Println("No aliases found.")
 	return nil
 }
+
+func (c *ListCommand) ListAll() error {
+	fmt.Println("No aliases found.")
+	return nil
+}
+
+func (c *ListCommand) ListByGroup(group string) error {
+	fmt.Println("This is a list of group")
+	return nil
+}
