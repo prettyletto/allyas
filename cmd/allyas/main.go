@@ -21,6 +21,8 @@ func main() {
 	d.Register(help)
 	list := commands.NewListCommand()
 	d.Register(list)
+	init := commands.NewInitCommand()
+	d.Register(init)
 
 	ctx := commands.CommandContext{
 		ConfigPath: "",
