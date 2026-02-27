@@ -35,4 +35,9 @@ func SaveStorage(path string, store models.Store) error {
 		return nil
 	}
 
+	if err := os.WriteFile(path, data, WritePerm); err != nil {
+		return err
+	}
+
+	return nil
 }

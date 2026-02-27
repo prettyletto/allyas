@@ -16,6 +16,9 @@ const (
 	ConfigPathEnv = "ALLYAS_CONFIG_PATH"
 	StorePathEnv  = "ALLYAS_STORE_PATH"
 	SourcePathEnv = "ALLYAS_SOURCE_PATH"
+
+	DirPerm   = 0o755
+	WritePerm = 0644
 )
 
 func EnsureAppConfigDir() (string, error) {
@@ -24,7 +27,7 @@ func EnsureAppConfigDir() (string, error) {
 		return "", err
 	}
 
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	if err := os.MkdirAll(dir, DirPerm); err != nil {
 		return "", err
 	}
 
@@ -86,6 +89,7 @@ func AppConfigDir() (string, error) {
 func ConfigPath() (string, error) {
 	return resolvePath(ConfigDirEnv, ConfigPathEnv, ConfigFileName)
 }
+
 func StorePath() (string, error) {
 	return resolvePath(ConfigDirEnv, StorePathEnv, StoreFileName)
 }
