@@ -32,7 +32,7 @@ func SaveConfig(path string, cfg models.Config) error {
 		return err
 	}
 	if _, err := EnsureAppConfigDir(); err != nil {
-		return nil
+		return err
 	}
 
 	if err := os.WriteFile(path, data, WritePerm); err != nil {

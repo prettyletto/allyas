@@ -84,7 +84,7 @@ func (c *InitCommand) Execute(ctx CommandContext, args []string) error {
 		if err := storage.SaveStore(storePath, store); err != nil {
 			return fmt.Errorf("save store %q: %w", storePath, err)
 		}
-
 	}
+
 	return nil
 }

@@ -42,7 +42,6 @@ func EnsureAppConfigDir() (string, error) {
 	if err := os.MkdirAll(dir, DirPerm); err != nil {
 		return "", err
 	}
-
 	return dir, nil
 }
 
