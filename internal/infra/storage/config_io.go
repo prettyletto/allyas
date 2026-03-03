@@ -17,7 +17,7 @@ func LoadConfig(path string) (models.Config, error) {
 	}
 
 	if len(data) == 0 {
-		return cfg, errors.New("config file is empty")
+		return cfg, errors.New("config file is empty, try to use <allyas init>")
 	}
 
 	if err := json.Unmarshal(data, &cfg); err != nil {

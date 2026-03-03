@@ -12,3 +12,13 @@ type Alias struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
+
+type AliasParams struct {
+	Group       string
+	Description string   `json:"description"`
+	Tags        []string `json:"tags"`
+}
+
+func AliasParams(name, command string) {
+
+}

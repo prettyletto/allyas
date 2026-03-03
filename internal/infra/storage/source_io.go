@@ -11,7 +11,7 @@ func LoadSource(path string) (string, error) {
 		return "", err
 	}
 	if len(data) == 0 {
-		return "", fmt.Errorf("source file is empty.")
+		return "", fmt.Errorf("source file is empty, try to use the command <allyas init>")
 	}
 
 	return string(data), nil

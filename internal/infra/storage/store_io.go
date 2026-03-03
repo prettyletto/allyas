@@ -17,7 +17,7 @@ func LoadStore(path string) (models.Store, error) {
 	}
 
 	if len(data) == 0 {
-		return store, errors.New("store file is empty")
+		return store, errors.New("store file is empty. try to use the command <allyas init>")
 	}
 
 	if err := json.Unmarshal(data, &store); err != nil {

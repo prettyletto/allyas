@@ -23,6 +23,8 @@ func main() {
 	d.Register(list)
 	init := commands.NewInitCommand()
 	d.Register(init)
+	create := commands.NewCreateCommand()
+	d.Register(create)
 
 	ctx, err := buildCommandContext()
 	if err != nil {
