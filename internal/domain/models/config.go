@@ -1,5 +1,7 @@
 package models
 
+const ConfigVersion = 1
+
 type SyncConfig struct {
 	Enabled  bool   `json:"enabled"`
 	Provider string `json:"provider"`
@@ -9,6 +11,7 @@ type SyncConfig struct {
 
 type Config struct {
 	SchemaVersion      int        `json:"schema_version"`
+	ConfigVersion      int        `json:"config_version"`
 	DefaultGroup       string     `json:"default_group"`
 	AutoInit           bool       `json:"auto_init"`
 	ConfirmBeforeWrite bool       `json:"confirm_write"`
@@ -21,6 +24,7 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		SchemaVersion:      SchemaVersion,
+		ConfigVersion:      ConfigVersion,
 		DefaultGroup:       "general",
 		AutoInit:           true,
 		ConfirmBeforeWrite: true,

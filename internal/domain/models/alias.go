@@ -2,13 +2,6 @@ package models
 
 import "time"
 
-const SchemaVersion = 1
-
-type Store struct {
-	SchemaVersion int     `json:"schema_version"`
-	Aliases       []Alias `json:"aliases"`
-}
-
 type Alias struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`

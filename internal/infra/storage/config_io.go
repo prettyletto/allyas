@@ -8,26 +8,26 @@ import (
 	"github.com/Prettyletto/Allyas/internal/domain/models"
 )
 
-func LoadStorage(path string) (models.Store, error) {
-	var store models.Store
+func LoadConfig(path string) (models.Config, error) {
+	var cfg models.Config
 
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return store, err
+		return cfg, err
 	}
 
 	if len(data) == 0 {
-		return store, errors.New("config file is empty")
+		return cfg, errors.New("config file is empty")
 	}
 
-	if err := json.Unmarshal(data, &store); err != nil {
-		return store, err
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		return cfg, err
 	}
-	return store, nil
+	return cfg, nil
 }
 
-func SaveStorage(path string, store models.Store) error {
-	data, err := json.MarshalIndent(store, "", " ")
+func SaveConfig(path string, cfg models.Config) error {
+	data, err := json.MarshalIndent(cfg, "", " ")
 	if err != nil {
 		return err
 	}
