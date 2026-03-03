@@ -24,12 +24,13 @@ func main() {
 	init := commands.NewInitCommand()
 	d.Register(init)
 
-	ctx := commands.CommandContext{
-		ConfigPath: "",
-		Verbose:    false,
+	ctx, err := buildCommandContext()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
-	if err := d.Dispatch(ctx, os.Args); err != nil {
+	if err := d.Dispatch(*ctx, os.Args); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

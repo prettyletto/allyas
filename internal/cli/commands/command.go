@@ -2,6 +2,8 @@ package commands
 
 type CommandContext struct {
 	ConfigPath string
+	StorePath  string
+	SourcePath string
 	Verbose    bool
 }
 

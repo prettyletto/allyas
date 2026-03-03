@@ -31,59 +31,55 @@ func (c *InitCommand) Description() string {
 	and prepare the file to be injected in the shell`
 }
 
+func (c *InitCommand) maybeOverWrite(
+	path, prompt string,
+	writeFn func(string) error,
+) error {
+	exists, err := storage.FileExists(path)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		ok, err := ui.AskYesNo(os.Stdin, os.Stdout, prompt, false)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return nil
+		}
+	}
+
+	return writeFn(path)
+}
+
 func (c *InitCommand) Execute(ctx CommandContext, args []string) error {
 	cfgPath := ctx.ConfigPath
-	if cfgPath == "" {
-		var err error
-		cfgPath, err = storage.ConfigPath()
-		if err != nil {
-			return fmt.Errorf("resolve config path: %w", err)
-		}
-	}
-
-	storePath, err := storage.StorePath()
-	if err != nil {
-		return fmt.Errorf("resolve store path: %w", err)
-	}
-
-	writeCfg := true
-	cfgExists, err := storage.FileExists(cfgPath)
-	if err != nil {
-		return fmt.Errorf("check config file: %w", err)
-	}
-	if cfgExists {
-		ok, err := ui.AskYesNo(os.Stdin, os.Stdout, "config file already exists; reset to default? WARN: this will delete all current aliases.", false)
-		if err != nil {
-			return err
-		}
-		writeCfg = ok
-	}
-
-	writeStore := true
-	storeExists, err := storage.FileExists(storePath)
-	if err != nil {
-		return fmt.Errorf("check store file: %w", err)
-	}
-	if storeExists {
-		ok, err := ui.AskYesNo(os.Stdin, os.Stdout, "store file already exists; reset to default? WARN: this will delete all current aliases.", false)
-		if err != nil {
-			return err
-		}
-		writeStore = ok
-	}
+	storePath := ctx.StorePath
+	sourcePath := ctx.SourcePath
 
 	cfg := models.DefaultConfig()
 	store := models.DefaultStore()
+	source := "#allyas source file \n"
 
-	if writeCfg {
-		if err := storage.SaveConfig(cfgPath, cfg); err != nil {
-			return fmt.Errorf("save config %q: %w", cfgPath, err)
-		}
+	if err := c.maybeOverWrite(cfgPath,
+		"config file already exists; reset to default?",
+		func(p string) error { return storage.SaveConfig(p, cfg) },
+	); err != nil {
+		return fmt.Errorf("init config %q: %w", cfgPath, err)
 	}
-	if writeStore {
-		if err := storage.SaveStore(storePath, store); err != nil {
-			return fmt.Errorf("save store %q: %w", storePath, err)
-		}
+
+	if err := c.maybeOverWrite(storePath,
+		"store file already exists; reset to default?",
+		func(p string) error { return storage.SaveStore(p, store) },
+	); err != nil {
+		return fmt.Errorf("init store %q: %w", storePath, err)
+	}
+	if err := c.maybeOverWrite(sourcePath,
+		"source file already exists; reset to default?",
+		func(p string) error { return storage.SaveSource(p, source) },
+	); err != nil {
+		return fmt.Errorf("source config %q: %w", sourcePath, err)
 	}
 
 	return nil
