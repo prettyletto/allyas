@@ -3,7 +3,6 @@ package text
 import "strings"
 
 func NormalizeName(s string) string {
-
 	return strings.ToLower(strings.TrimSpace(s))
 }
 

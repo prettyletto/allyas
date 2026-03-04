@@ -87,12 +87,16 @@ func (c *CreateCommand) Execute(ctx CommandContext, args []string) error {
 	if err != nil {
 		return err
 	}
+	if ctx.ConfigPath == "" {
+		return fmt.Errorf("command context is missing config path; try allyas init command")
+	}
 
 	if ctx.StorePath == "" || ctx.SourcePath == "" {
 		return fmt.Errorf("command context is missing store/source paths; try allyas init command")
 	}
 
 	ci := createapp.CreateInput{
+		ConfigPath:  ctx.ConfigPath,
 		StorePath:   ctx.StorePath,
 		SourcePath:  ctx.SourcePath,
 		Name:        in.Name,
