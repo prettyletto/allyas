@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type Alias struct {
 	ID          string    `json:"id"`
@@ -19,6 +22,27 @@ type AliasParams struct {
 	Tags        []string `json:"tags"`
 }
 
-func AliasParams(name, command string) {
+func NewAlias(id, name, command string, p AliasParams) (*Alias, error) {
+	if id == "" {
+		return nil, errors.New("id cannot be empty")
+	}
+	if name == "" {
+		return nil, errors.New("alias name cannot be empty")
+	}
+	if command == "" {
+		return nil, errors.New("alias command cannot be empty")
+	}
 
+	now := time.Now()
+
+	return &Alias{
+		ID:          id,
+		Name:        name,
+		Command:     command,
+		Group:       p.Group,
+		Description: p.Description,
+		Tags:        p.Tags,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}, nil
 }
