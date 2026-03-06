@@ -6,7 +6,7 @@ import (
 	"golang.org/x/term"
 )
 
-func GetTerminalWith() int {
+func GetTerminalWidth() int {
 	fd := int(os.Stdout.Fd())
 	if !term.IsTerminal(fd){
 		return 80

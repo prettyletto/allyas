@@ -132,7 +132,7 @@ func (c *ListCommand) Execute(ctx CommandContext, args []string) error {
 	}
 
 	termInfo := appPrinter.TerminalInfo{
-		Width: ui.GetTerminalWith(),
+		Width: ui.GetTerminalWidth(),
 		IsTTY: term.IsTerminal(int(os.Stdout.Fd())),
 	}
 	if fl.ShowCompact && !fl.ShowFull && len(lctx.Options.Detailed) == 0 {
