@@ -54,7 +54,11 @@ func parseCreate(args []string) (createInput, createFlags, error) {
 			if i+1 >= len(args) {
 				return in, fl, fmt.Errorf("%s requires a value", a)
 			}
-			fl.Tags = append(fl.Tags, args[i+1])
+			tags := splitTags(args[i+1])
+			if len(tags) == 0 {
+				return in, fl, fmt.Errorf("%s requires at least one non-empty tag", a)
+			}
+			fl.Tags = appendUniqueTags(fl.Tags, tags)
 			i += 2
 		default:
 			return in, fl, fmt.Errorf("unkown arg: %s", a)

@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	appList "github.com/Prettyletto/Allyas/internal/app/aliases/list"
 	"github.com/Prettyletto/Allyas/internal/cli/ui"
@@ -14,10 +15,12 @@ type listFlags struct {
 	ShowCompact     bool
 	ShowFull        bool
 	ShowDescription bool
-	ShowGroup       bool
-	ShowTags        bool
 	ShowDates       bool
-	Sort            appList.Sort
+
+	FilterGroup string
+	FilterTags  []string
+
+	Sort appList.Sort
 }
 
 type ListCommand struct{}
@@ -43,23 +46,35 @@ func parseListArgs(args []string) (listFlags, error) {
 
 	for i := 0; i < len(args); i++ {
 		a := args[i]
+
 		switch a {
-		case "--compact, --less, -c":
+		case "--compact", "--less", "-c":
 			fl.ShowCompact = true
 		case "--detailed", "--full", "-f":
 			fl.ShowFull = true
+		case "--dates", "-dt":
+			fl.ShowDates = true
 		case "--description", "--desc", "-d":
 			fl.ShowDescription = true
 		case "--group", "-g":
-			fl.ShowGroup = true
-		case "--tags", "-t":
-			fl.ShowTags = true
-		case "--dates", "-dt":
-			fl.ShowDates = true
+			if i+1 >= len(args) || strings.HasPrefix(args[i+1], "-") {
+				return fl, fmt.Errorf("%s requires a group value", a)
+			}
+			fl.FilterGroup = args[i+1]
+			i++
+		case "--tags", "--tag", "-t":
+			if i+1 >= len(args) || strings.HasPrefix(args[i+1], "-") {
+				return fl, fmt.Errorf("%s requires a tag value", a)
+			}
+			tags := splitTags(args[i+1])
+			if len(tags) == 0 {
+				return fl, fmt.Errorf("%s requires at least one non-empty tag", a)
+			}
+			fl.FilterTags = appendUniqueTags(fl.FilterTags, tags)
+			i++
 		case "--sort", "-s":
-			if i+1 >= len(args) {
-				fl.Sort = appList.SortName
-				return fl, nil
+			if i+1 >= len(args) || strings.HasPrefix(args[i+1], "-") {
+				return fl, fmt.Errorf("%s requires one of: name, group, dates", a)
 			}
 			sortValue, err := parseSort(args[i+1])
 			if err != nil {
@@ -71,18 +86,17 @@ func parseListArgs(args []string) (listFlags, error) {
 			return fl, fmt.Errorf("unkown arg: %s", a)
 		}
 	}
+
 	return fl, nil
 }
+
 func toListOptions(fl listFlags) appList.ListOptions {
 	detailed := map[string]bool{}
-
 	if fl.ShowFull || fl.ShowDescription {
 		detailed[appList.FieldDescription] = true
 	}
-	if fl.ShowFull || fl.ShowGroup {
+	if fl.ShowFull {
 		detailed[appList.FieldGroup] = true
-	}
-	if fl.ShowFull || fl.ShowTags {
 		detailed[appList.FieldTags] = true
 	}
 	if fl.ShowFull || fl.ShowDates {
@@ -90,9 +104,11 @@ func toListOptions(fl listFlags) appList.ListOptions {
 	}
 
 	return appList.ListOptions{
-		Compact:  fl.ShowCompact && !fl.ShowFull,
-		Detailed: detailed,
-		SortBy:   fl.Sort,
+		Compact:     !fl.ShowFull && len(detailed) == 0,
+		Detailed:    detailed,
+		SortBy:      fl.Sort,
+		FilterGroup: fl.FilterGroup,
+		FilterTags:  fl.FilterTags,
 	}
 }
 
@@ -135,7 +151,7 @@ func (c *ListCommand) Execute(ctx CommandContext, args []string) error {
 		Width: ui.GetTerminalWidth(),
 		IsTTY: term.IsTerminal(int(os.Stdout.Fd())),
 	}
-	if fl.ShowCompact && !fl.ShowFull && len(lctx.Options.Detailed) == 0 {
+	if lctx.Options.Compact {
 		return appPrinter.PrintCompact(os.Stdout, items, termInfo)
 	}
 

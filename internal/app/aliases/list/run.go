@@ -3,6 +3,7 @@ package list
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/Prettyletto/Allyas/internal/domain/models"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
@@ -34,6 +35,9 @@ type ListOptions struct {
 	Compact  bool
 	Detailed map[string]bool
 	SortBy   Sort
+
+	FilterGroup string
+	FilterTags  []string
 }
 
 type ListOutput struct {
@@ -44,6 +48,29 @@ type ListOutput struct {
 	Tags        []string
 	CreatedAt   string
 	UpdatedAt   string
+}
+
+func matchesFilters(a models.Alias, o ListOptions) bool {
+	if o.FilterGroup != "" && !strings.EqualFold(strings.TrimSpace(a.Group),
+		strings.TrimSpace(o.FilterGroup)) {
+		return false
+	}
+
+	if len(o.FilterTags) > 0 {
+		for _, need := range o.FilterTags {
+			found := false
+			for _, got := range a.Tags {
+				if strings.EqualFold(strings.TrimSpace(got), strings.TrimSpace(need)) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func applySort(items []ListOutput, sortBy Sort) {
@@ -125,11 +152,15 @@ func ListAll(lctx ListContext) ([]ListOutput, error) {
 	}
 
 	for _, a := range store.Aliases {
+		if !matchesFilters(a, lctx.Options) {
+			continue
+		}
+
 		out = append(out, storeToOutput(a, lctx.Options))
 	}
 
 	if lctx.Options.SortBy != "" {
-	 applySort(out, lctx.Options.SortBy)
+		applySort(out, lctx.Options.SortBy)
 	}
 
 	return out, nil
