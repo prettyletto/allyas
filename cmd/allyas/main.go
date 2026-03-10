@@ -25,6 +25,8 @@ func main() {
 	d.Register(init)
 	create := commands.NewCreateCommand()
 	d.Register(create)
+	remove := commands.NewRemoveCommand()
+	d.Register(remove)
 
 	ctx, err := buildCommandContext()
 	if err != nil {

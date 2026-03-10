@@ -29,7 +29,7 @@ func parseRemove(args []string) (removeInput, error) {
 			if i+1 >= len(args) {
 				return in, fmt.Errorf("%s requires a value", a)
 			}
-			in.Name = args[i+1]
+			in.Group = args[i+1]
 			i++
 		case strings.HasPrefix(a, "-"):
 			return in, fmt.Errorf("unkown flag:%s", a)
@@ -66,7 +66,7 @@ func (c *RemoveCommand) Execute(ctx CommandContext, args []string) error {
 		return err
 	}
 
-	if ctx.ConfigPath == ""  {
+	if ctx.ConfigPath == "" {
 		return fmt.Errorf("command context is missing config paths; try allyas init command")
 	}
 
@@ -75,19 +75,19 @@ func (c *RemoveCommand) Execute(ctx CommandContext, args []string) error {
 	}
 
 	ri := remove.InputRemove{
-		ConfigPath:  ctx.ConfigPath,
-		StorePath:   ctx.StorePath,
-		SourcePath:  ctx.SourcePath,
-		Name:  in.Name,
-		Group:  in.Group,
+		ConfigPath: ctx.ConfigPath,
+		StorePath:  ctx.StorePath,
+		SourcePath: ctx.SourcePath,
+		Name:       in.Name,
+		Group:      in.Group,
 	}
 
-	 out, err := remove.Run(ri)
+	out, err := remove.Run(ri)
 	if err != nil {
 		return fmt.Errorf("remove alias: %w", err)
 	}
 
-	fmt.Println(out.message)
+	fmt.Println(out.Message)
 
 	return nil
 }
