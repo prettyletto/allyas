@@ -41,6 +41,7 @@ func RemoveByName(in InputRemove) (OutputRemove, error) {
 		if text.NormalizeName(a.Name) == normName {
 			store.Aliases = slices.Delete(store.Aliases, i, i+1)
 			match++
+			break
 		}
 	}
 
