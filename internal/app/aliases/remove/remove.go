@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/Prettyletto/Allyas/internal/domain/models"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
 	"github.com/Prettyletto/Allyas/internal/shared/text"
 )
@@ -34,14 +35,19 @@ func RemoveByName(in InputRemove) (OutputRemove, error) {
 	}
 
 	normName := text.NormalizeName(in.Name)
+	match := 0
+
 	for i, a := range store.Aliases {
 		if text.NormalizeName(a.Name) == normName {
 			store.Aliases = slices.Delete(store.Aliases, i, i+1)
-		} else {
-
-			return OutputRemove{}, fmt.Errorf("theres no alias named: %s", normName)
+			match++
 		}
 	}
+
+	if match <= 0 {
+		return OutputRemove{}, fmt.Errorf("theres no alias named: %s", normName)
+	}
+
 	source := storage.RenderSource(store, cfg.DefaultGroup)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
 		return OutputRemove{}, fmt.Errorf("save source: %w", err)
@@ -65,14 +71,21 @@ func RemoveByGroup(in InputRemove) (OutputRemove, error) {
 	}
 
 	normGroup := text.NormalizeName(in.Group)
-	for i, a := range store.Aliases {
+	newAliases := []models.Alias{}
+	match := 0
+	for _, a := range store.Aliases {
 		if text.NormalizeName(a.Group) == normGroup {
-			store.Aliases = slices.Delete(store.Aliases, i, i+1)
+			match++
 		} else {
-
-			return OutputRemove{}, fmt.Errorf("theres no alias named: %s", normGroup)
+			newAliases = append(newAliases, a)
 		}
 	}
+
+	if match <= 0 {
+		return OutputRemove{}, fmt.Errorf("theres no group named: %s", normGroup)
+	}
+
+	store.Aliases = newAliases
 	source := storage.RenderSource(store, cfg.DefaultGroup)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
 		return OutputRemove{}, fmt.Errorf("save source: %w", err)
@@ -80,12 +93,12 @@ func RemoveByGroup(in InputRemove) (OutputRemove, error) {
 	if err := storage.SaveStore(in.StorePath, store); err != nil {
 		return OutputRemove{}, fmt.Errorf("save store: %w", err)
 	}
-	return OutputRemove{Group: normGroup, Message: fmt.Sprintf("group %s removed with success", in.Group)}, nil
+	return OutputRemove{Group: normGroup, Message: fmt.Sprintf("group %s removed with success, removed aliases:%d", in.Group, match)}, nil
 
 }
 
 func Run(in InputRemove) (OutputRemove, error) {
-	if in.Group == "" {
+	if in.Group != "" {
 		return RemoveByGroup(in)
 	} else {
 		return RemoveByName(in)
