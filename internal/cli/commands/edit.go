@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	createapp "github.com/Prettyletto/Allyas/internal/app/aliases/create"
+	"github.com/Prettyletto/Allyas/internal/app/aliases/edit"
 )
 
 type editInput struct {
@@ -37,6 +37,12 @@ func parseEdit(args []string) (editInput, error) {
 				return in, fmt.Errorf("%s requires a value", a)
 			}
 			in.Name = args[i+1]
+			i += 2
+		case "--command", "-c":
+			if i+1 >= len(args) {
+				return in, fmt.Errorf("%s requires a value", a)
+			}
+			in.Command = args[i+1]
 			i += 2
 		case "--description", "-d":
 			if i+1 >= len(args) {
@@ -75,23 +81,24 @@ func NewEditCommand() *EditCommand {
 }
 
 func (c *EditCommand) Names() []string {
-	return []string{"Edit", "-c", "add"}
+	return []string{"edit", "-e", "update", "-u"}
 }
 
 func (c *EditCommand) Usage() string {
-	return `edit <current-name> [--name|-a NEW_NAME] [--command|-c NEW_COMMAND] 
+	return `edit <current-name> [--name|-n NEW_NAME] [--command|-c NEW_COMMAND] 
 	[--description|-d NEW_DESCRIPTION] [--group|-g NEW_GROUP] [--tags|-t TAGS]`
 }
 
 func (c *EditCommand) Description() string {
-	return `Edit a new alias to be sourced into the shell`
+	return `Edit an existing alias and rewrite the source file`
 }
 
 func (c *EditCommand) Execute(ctx CommandContext, args []string) error {
-	in, fl, err := parseCreate(args)
+	in, err := parseEdit(args)
 	if err != nil {
 		return err
 	}
+
 	if ctx.ConfigPath == "" {
 		return fmt.Errorf("command context is missing config path; try allyas init command")
 	}
@@ -100,21 +107,24 @@ func (c *EditCommand) Execute(ctx CommandContext, args []string) error {
 		return fmt.Errorf("command context is missing store/source paths; try allyas init command")
 	}
 
-	ci := createapp.CreateInput{
+	ei := edit.EditInput{
 		ConfigPath:  ctx.ConfigPath,
 		StorePath:   ctx.StorePath,
 		SourcePath:  ctx.SourcePath,
+		CurrentName: in.CurrentName,
 		Name:        in.Name,
 		Command:     in.Command,
-		Group:       fl.Group,
-		Description: fl.Description,
-		Tags:        fl.Tags,
+		Group:       in.Group,
+		Description: in.Description,
+		Tags:        in.Tags,
 	}
-	out, err := createapp.Run(ci)
+
+	out, err := edit.Run(ei)
 	if err != nil {
-		return fmt.Errorf("create alias: %w", err)
+		return fmt.Errorf("edit alias: %w", err)
 	}
-	fmt.Printf("Alias created: %s (%s)\n", out.Name, out.ID)
+
+	fmt.Println("alias", out.Name, "edited with success!")
 
 	return nil
 }

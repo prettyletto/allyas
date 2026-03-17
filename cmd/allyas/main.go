@@ -25,6 +25,8 @@ func main() {
 	d.Register(init)
 	create := commands.NewCreateCommand()
 	d.Register(create)
+	edit := commands.NewEditCommand()
+	d.Register(edit)
 	remove := commands.NewRemoveCommand()
 	d.Register(remove)
 
