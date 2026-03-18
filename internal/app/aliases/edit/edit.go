@@ -2,6 +2,8 @@ package edit
 
 import (
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/Prettyletto/Allyas/internal/domain/models"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
@@ -40,28 +42,50 @@ func editAlias(in EditInput) (EditOutput, error) {
 		return EditOutput{}, fmt.Errorf("load store: %w", err)
 	}
 
-	match := false
-	normName := text.NormalizeName(in.CurrentName)
+	normCurrent := text.NormalizeName(in.CurrentName)
+	nextName := text.NormalizeName(in.Name)
+	nextCommand := strings.TrimSpace(in.Command)
+
+	matchIndex := -1
+	duplicate := false
+
 	for i, a := range store.Aliases {
-		if text.NormalizeName(in.Name) == text.NormalizeName(a.Name) {
-			return EditOutput{}, fmt.Errorf("%s already exists as a valid alias.", normName)
-		}
+		normAlias := text.NormalizeName(a.Name)
 
-		if text.NormalizeName(a.Name) == normName {
+		if normAlias == normCurrent {
+			matchIndex = i
 			newAlias = a
-			newAlias.Name = utils.Resolver(in.Name != "", in.Name, a.Name)
-			newAlias.Description = utils.Resolver(in.Description != "", in.Description, a.Description)
-			newAlias.Command = utils.Resolver(in.Command != "", in.Command, a.Command)
-			newAlias.Group = utils.Resolver(in.Group != "", in.Group, a.Group)
-			newAlias.Tags = utils.Resolver(len(in.Tags) > 0, in.Tags, a.Tags)
-
-			store.Aliases[i] = newAlias
-			match = true
+			continue
+		}
+		if in.Name != "" && normAlias == nextName {
+			duplicate = true
 		}
 	}
-	if !match {
-		return EditOutput{}, fmt.Errorf("%s not found as an valid alias.", normName)
+
+	if matchIndex == -1 {
+		return EditOutput{}, fmt.Errorf("%s not found as a valid alias", normCurrent)
 	}
+
+	if in.Name != "" && nextName == "" {
+		return EditOutput{}, fmt.Errorf("alias name cannot be empty")
+	}
+
+	if in.Command != "" && nextCommand == "" {
+		return EditOutput{}, fmt.Errorf("alias command cannot be empty")
+	}
+
+	if duplicate {
+		return EditOutput{}, fmt.Errorf("%s already exists as a valid alias", nextName)
+	}
+
+	newAlias.Name = utils.Resolver(in.Name != "", nextName, newAlias.Name)
+	newAlias.Command = utils.Resolver(in.Command != "", nextCommand, newAlias.Command)
+	newAlias.Description = utils.Resolver(in.Description != "", in.Description, newAlias.Description)
+	newAlias.Group = utils.Resolver(in.Group != "", in.Group, newAlias.Group)
+	newAlias.Tags = utils.Resolver(len(in.Tags) > 0, in.Tags, newAlias.Tags)
+
+	newAlias.UpdatedAt = time.Now()
+	store.Aliases[matchIndex] = newAlias
 
 	source := storage.RenderSource(store, cfg.DefaultGroup)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
