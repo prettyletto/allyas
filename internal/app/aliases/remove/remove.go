@@ -3,6 +3,7 @@ package remove
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/Prettyletto/Allyas/internal/domain/models"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
@@ -34,11 +35,11 @@ func RemoveByName(in InputRemove) (OutputRemove, error) {
 		return OutputRemove{}, fmt.Errorf("load store: %w", err)
 	}
 
-	normName := text.NormalizeName(in.Name)
+	normName := strings.TrimSpace(in.Name)
 	match := 0
 
 	for i, a := range store.Aliases {
-		if text.NormalizeName(a.Name) == normName {
+		if a.Name == normName {
 			store.Aliases = slices.Delete(store.Aliases, i, i+1)
 			match++
 			break

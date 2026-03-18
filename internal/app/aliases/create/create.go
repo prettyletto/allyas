@@ -36,16 +36,20 @@ func createAlias(in CreateInput) (CreateOutput, error) {
 		return CreateOutput{}, fmt.Errorf("load store: %w", err)
 	}
 
-	normName := strings.ToLower(strings.TrimSpace(in.Name))
+	normName := strings.TrimSpace(in.Name)
+	if normName == "" {
+		return CreateOutput{}, fmt.Errorf("alias name cannot be empty")
+	}
+
 	for _, a := range store.Aliases {
-		if strings.ToLower(strings.TrimSpace(a.Name)) == normName {
-			return CreateOutput{}, fmt.Errorf("alias %q already exists", in.Name)
+		if strings.TrimSpace(a.Name) == normName {
+			return CreateOutput{}, fmt.Errorf("alias %q already exists", normName)
 		}
 	}
 
 	id := uuid.NewString()
 	resolvedGroup := utils.Resolver(in.Group != "", in.Group, cfg.DefaultGroup)
-	alias, err := models.NewAlias(id, in.Name, in.Command, models.AliasParams{
+	alias, err := models.NewAlias(id, normName, in.Command, models.AliasParams{
 		Group:       resolvedGroup,
 		Description: in.Description,
 		Tags:        in.Tags,

@@ -33,11 +33,10 @@ func SaveSource(path, content string) error {
 	return nil
 }
 
-
 func RenderSource(store models.Store, defaultGroup string) string {
 	grouped := make(map[string][]models.Alias, len(store.Aliases))
 
-	for _, a := range store.Aliases{
+	for _, a := range store.Aliases {
 		g := strings.TrimSpace(a.Group)
 		if g == "" {
 			g = strings.TrimSpace(defaultGroup)
@@ -47,7 +46,7 @@ func RenderSource(store models.Store, defaultGroup string) string {
 		}
 		grouped[g] = append(grouped[g], a)
 	}
-	groupNames := make([]string, 0 , len(grouped))
+	groupNames := make([]string, 0, len(grouped))
 	for g := range grouped {
 		groupNames = append(groupNames, g)
 	}
@@ -62,9 +61,9 @@ func RenderSource(store models.Store, defaultGroup string) string {
 		}
 		fmt.Fprintf(&b, "#%s\n", g)
 		aliases := grouped[g]
-		sort.SliceStable(aliases, func(i, j int)bool {
-			return strings.ToLower(strings.TrimSpace(aliases[i].Name)) < 
-			strings.ToLower(strings.TrimSpace(aliases[j].Name))
+		sort.SliceStable(aliases, func(i, j int) bool {
+			return strings.TrimSpace(aliases[i].Name) <
+				strings.TrimSpace(aliases[j].Name)
 		})
 
 		for _, a := range aliases {

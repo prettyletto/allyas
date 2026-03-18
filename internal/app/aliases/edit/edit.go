@@ -7,7 +7,6 @@ import (
 
 	"github.com/Prettyletto/Allyas/internal/domain/models"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
-	"github.com/Prettyletto/Allyas/internal/shared/text"
 	"github.com/Prettyletto/Allyas/internal/shared/utils"
 )
 
@@ -42,22 +41,20 @@ func editAlias(in EditInput) (EditOutput, error) {
 		return EditOutput{}, fmt.Errorf("load store: %w", err)
 	}
 
-	normCurrent := text.NormalizeName(in.CurrentName)
-	nextName := text.NormalizeName(in.Name)
-	nextCommand := strings.TrimSpace(in.Command)
+	normCurrent := strings.TrimSpace(in.CurrentName)
+	nextName := strings.TrimSpace(in.Name)
 
 	matchIndex := -1
 	duplicate := false
 
 	for i, a := range store.Aliases {
-		normAlias := text.NormalizeName(a.Name)
 
-		if normAlias == normCurrent {
+		if a.Name == normCurrent {
 			matchIndex = i
 			newAlias = a
 			continue
 		}
-		if in.Name != "" && normAlias == nextName {
+		if in.Name != "" && a.Name == nextName {
 			duplicate = true
 		}
 	}
@@ -70,7 +67,7 @@ func editAlias(in EditInput) (EditOutput, error) {
 		return EditOutput{}, fmt.Errorf("alias name cannot be empty")
 	}
 
-	if in.Command != "" && nextCommand == "" {
+	if in.Command != "" && strings.TrimSpace(in.Command) == "" {
 		return EditOutput{}, fmt.Errorf("alias command cannot be empty")
 	}
 
@@ -79,7 +76,7 @@ func editAlias(in EditInput) (EditOutput, error) {
 	}
 
 	newAlias.Name = utils.Resolver(in.Name != "", nextName, newAlias.Name)
-	newAlias.Command = utils.Resolver(in.Command != "", nextCommand, newAlias.Command)
+	newAlias.Command = utils.Resolver(in.Command != "", in.Command, newAlias.Command)
 	newAlias.Description = utils.Resolver(in.Description != "", in.Description, newAlias.Description)
 	newAlias.Group = utils.Resolver(in.Group != "", in.Group, newAlias.Group)
 	newAlias.Tags = utils.Resolver(len(in.Tags) > 0, in.Tags, newAlias.Tags)

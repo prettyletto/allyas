@@ -7,7 +7,6 @@ import (
 
 	"github.com/Prettyletto/Allyas/internal/domain/models"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
-	"github.com/Prettyletto/Allyas/internal/shared/text"
 )
 
 const (
@@ -118,7 +117,7 @@ func applySort(items []ListOutput, sortBy Sort) {
 
 func storeToOutput(in models.Alias, options ListOptions) ListOutput {
 	out := ListOutput{
-		Name:    text.NormalizeName(in.Name),
+		Name:    in.Name,
 		Command: in.Command,
 	}
 

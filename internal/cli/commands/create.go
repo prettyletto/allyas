@@ -27,7 +27,7 @@ func parseCreate(args []string) (createInput, createFlags, error) {
 	}
 
 	in.Name = strings.TrimSpace(args[0])
-	in.Command = strings.TrimSpace(args[1])
+	in.Command = args[1]
 
 	if in.Name == "" || in.Command == "" {
 		return in, fl, fmt.Errorf("name and comand are required")
