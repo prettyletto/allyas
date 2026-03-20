@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Prettyletto/Allyas/internal/domain/models"
+	"github.com/Prettyletto/Allyas/internal/infra/shell"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
 	"github.com/Prettyletto/Allyas/internal/shared/utils"
 )
@@ -84,7 +85,7 @@ func editAlias(in EditInput) (EditOutput, error) {
 	newAlias.UpdatedAt = time.Now()
 	store.Aliases[matchIndex] = newAlias
 
-	source := storage.RenderSource(store, cfg.DefaultGroup)
+	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
 		return EditOutput{}, fmt.Errorf("save source: %w", err)
 	}

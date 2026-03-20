@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Prettyletto/Allyas/internal/domain/models"
+	"github.com/Prettyletto/Allyas/internal/infra/shell"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
 )
 
@@ -22,7 +23,7 @@ type InitPlan struct {
 func Run(paths InitPaths, plan InitPlan) error {
 	cfg := models.DefaultConfig()
 	store := models.DefaultStore()
-	source := "# allyas source file\n"
+	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell)
 
 	if plan.WriteConfig {
 		if err := storage.SaveConfig(paths.ConfigPath, cfg); err != nil {

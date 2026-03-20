@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Prettyletto/Allyas/internal/domain/models"
+	"github.com/Prettyletto/Allyas/internal/infra/shell"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
 	"github.com/Prettyletto/Allyas/internal/shared/text"
 )
@@ -50,7 +51,7 @@ func RemoveByName(in InputRemove) (OutputRemove, error) {
 		return OutputRemove{}, fmt.Errorf("theres no alias named: %s", normName)
 	}
 
-	source := storage.RenderSource(store, cfg.DefaultGroup)
+	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
 		return OutputRemove{}, fmt.Errorf("save source: %w", err)
 	}
@@ -88,7 +89,7 @@ func RemoveByGroup(in InputRemove) (OutputRemove, error) {
 	}
 
 	store.Aliases = newAliases
-	source := storage.RenderSource(store, cfg.DefaultGroup)
+	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
 		return OutputRemove{}, fmt.Errorf("save source: %w", err)
 	}

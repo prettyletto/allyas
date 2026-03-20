@@ -28,6 +28,7 @@ func DefaultConfig() Config {
 		DefaultGroup:       "general",
 		AutoInit:           true,
 		ConfirmBeforeWrite: true,
+		Shell:              "posix",
 		Sync:               SyncConfig{Enabled: false, Provider: "none"},
 	}
 
