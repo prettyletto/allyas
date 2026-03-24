@@ -20,6 +20,12 @@ type InitPlan struct {
 	WriteSource bool
 }
 
+type initFlags struct {
+	Shell string
+	Yes   bool
+	Force bool
+}
+
 func Run(paths InitPaths, plan InitPlan) error {
 	cfg := models.DefaultConfig()
 	store := models.DefaultStore()
