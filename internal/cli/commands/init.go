@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/Prettyletto/Allyas/internal/app/bootstrap"
 	"github.com/Prettyletto/Allyas/internal/cli/ui"
+	"github.com/Prettyletto/Allyas/internal/infra/shell"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
 )
 
@@ -14,17 +16,40 @@ var ErrCanceled = errors.New("init canceled")
 
 type initFlags struct {
 	Force bool
+	Shell shell.Type
+}
+
+func parseShell(s string) (shell.Type, error) {
+	t := shell.Type(s)
+	if !t.Valid() {
+		return "", fmt.Errorf("unsupported shell: %q", s)
+	}
+	return t, nil
 }
 
 func parseInitargs(args []string) (initFlags, error) {
 	var f initFlags
-	for _, a := range args {
+
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+
 		switch a {
+		case "--shell":
+			if i+1 >= len(args) || strings.HasPrefix(args[i+1], "-") {
+				return f, fmt.Errorf("%s requires value", a)
+			}
+			sh, err := parseShell(args[i+1])
+			if err != nil {
+				return f, err
+			}
+			f.Shell = sh
+			i++
 		case "--force", "-f":
 			f.Force = true
 		default:
 			return f, fmt.Errorf("unkown arg: %s", a)
 		}
+
 	}
 	return f, nil
 }
@@ -96,10 +121,18 @@ func (c *InitCommand) Execute(ctx CommandContext, args []string) error {
 	}
 
 	plan := bootstrap.InitPlan{
+		Shell:       flags.Shell,
 		WriteConfig: writeCfg,
 		WriteStore:  writeStore,
 		WriteSource: writeSource,
 	}
+	if err := bootstrap.Run(paths, plan); err != nil {
+		return err
+	}
 
-	return bootstrap.Run(paths, plan)
+	fmt.Println("Initialized config, store, and source files.")
+	fmt.Println("Next step: run `allyas install` to hook Allyas into your shell.")
+
+	return nil
+
 }

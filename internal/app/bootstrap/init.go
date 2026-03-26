@@ -15,20 +15,20 @@ type InitPaths struct {
 }
 
 type InitPlan struct {
+	Shell       shell.Type
 	WriteConfig bool
 	WriteStore  bool
 	WriteSource bool
 }
 
-type initFlags struct {
-	Shell string
-	Yes   bool
-	Force bool
-}
-
 func Run(paths InitPaths, plan InitPlan) error {
 	cfg := models.DefaultConfig()
 	store := models.DefaultStore()
+
+	if plan.Shell != "" {
+		cfg.Shell = string(plan.Shell)
+	}
+
 	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell)
 
 	if plan.WriteConfig {
