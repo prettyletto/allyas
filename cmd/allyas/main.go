@@ -23,6 +23,8 @@ func main() {
 	d.Register(list)
 	init := commands.NewInitCommand()
 	d.Register(init)
+	install := commands.NewInstallCommand()
+	d.Register(install)
 	create := commands.NewCreateCommand()
 	d.Register(create)
 	edit := commands.NewEditCommand()

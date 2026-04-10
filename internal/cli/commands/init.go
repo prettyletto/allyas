@@ -100,10 +100,13 @@ func (c *InitCommand) Execute(ctx CommandContext, args []string) error {
 		ConfigPath: ctx.ConfigPath,
 		StorePath:  ctx.StorePath,
 		SourcePath: ctx.SourcePath,
+		HookPath:   ctx.HookPath,
 	}
+
 	writeCfg := true
 	writeStore := true
 	writeSource := true
+	writeHook := true
 
 	if !flags.Force {
 		writeCfg, err = c.askWrite(paths.ConfigPath, "config file exists; reset to default?")
@@ -118,6 +121,11 @@ func (c *InitCommand) Execute(ctx CommandContext, args []string) error {
 		if err != nil {
 			return fmt.Errorf("check source file: %w", err)
 		}
+
+		writeHook, err = c.askWrite(paths.HookPath, "hook file exists; reset to default?")
+		if err != nil {
+			return fmt.Errorf("check hook file: %w", err)
+		}
 	}
 
 	plan := bootstrap.InitPlan{
@@ -125,14 +133,15 @@ func (c *InitCommand) Execute(ctx CommandContext, args []string) error {
 		WriteConfig: writeCfg,
 		WriteStore:  writeStore,
 		WriteSource: writeSource,
+		WriteHook:   writeHook,
 	}
 	if err := bootstrap.Run(paths, plan); err != nil {
 		return err
 	}
 
-	fmt.Println("Initialized config, store, and source files.")
-	fmt.Println("Next step: run `allyas install` to hook Allyas into your shell.")
+	fmt.Println("Initialized config, store, source, and hook files.")
+	fmt.Println("Next step: run `allyas install` to load Allyas automatically in your shell.")
+	fmt.Printf("Manual mode: source %q when you want to load Allyas in the current shell.\n", ctx.HookPath)
 
 	return nil
-
 }

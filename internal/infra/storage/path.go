@@ -11,14 +11,16 @@ const (
 	ConfigFileName = "config.json"
 	StoreFileName  = "store.json"
 	SourceFileName = "aliases.sh"
+	HookFileName   = "allyas_hook.sh"
 
 	ConfigDirEnv  = "ALLYAS_CONFIG_DIR"
 	ConfigPathEnv = "ALLYAS_CONFIG_PATH"
 	StorePathEnv  = "ALLYAS_STORE_PATH"
 	SourcePathEnv = "ALLYAS_SOURCE_PATH"
+	HookPathEnv   = "ALLYAS_HOOK_PATH"
 
 	DirPerm   = 0o755
-	WritePerm = 0644
+	WritePerm = 0o644
 )
 
 func FileExists(path string) (bool, error) {
@@ -107,4 +109,8 @@ func StorePath() (string, error) {
 
 func SourcePath() (string, error) {
 	return resolvePath(ConfigDirEnv, SourcePathEnv, SourceFileName)
+}
+
+func HookPath() (string, error) {
+	return resolvePath(HookPathEnv, HookPathEnv, HookFileName)
 }

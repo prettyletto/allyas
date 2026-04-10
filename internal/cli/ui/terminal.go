@@ -8,10 +8,10 @@ import (
 
 func GetTerminalWidth() int {
 	fd := int(os.Stdout.Fd())
-	if !term.IsTerminal(fd){
+	if !term.IsTerminal(fd) {
 		return 80
 	}
-	w,_, err := term.GetSize(fd)
+	w, _, err := term.GetSize(fd)
 	if err != nil || w <= 0 {
 		return 80
 	}

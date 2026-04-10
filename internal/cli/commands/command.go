@@ -4,6 +4,7 @@ type CommandContext struct {
 	ConfigPath string
 	StorePath  string
 	SourcePath string
+	HookPath   string
 	Verbose    bool
 }
 

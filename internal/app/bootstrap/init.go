@@ -12,6 +12,7 @@ type InitPaths struct {
 	ConfigPath string
 	StorePath  string
 	SourcePath string
+	HookPath   string
 }
 
 type InitPlan struct {
@@ -19,6 +20,7 @@ type InitPlan struct {
 	WriteConfig bool
 	WriteStore  bool
 	WriteSource bool
+	WriteHook   bool
 }
 
 func Run(paths InitPaths, plan InitPlan) error {
@@ -30,11 +32,11 @@ func Run(paths InitPaths, plan InitPlan) error {
 	}
 
 	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell)
+	hook := shell.RenderHook(paths.SourcePath, "allyas")
 
 	if plan.WriteConfig {
 		if err := storage.SaveConfig(paths.ConfigPath, cfg); err != nil {
 			return fmt.Errorf("save config %q: %w", paths.ConfigPath, err)
-
 		}
 	}
 	if plan.WriteStore {
@@ -45,6 +47,11 @@ func Run(paths InitPaths, plan InitPlan) error {
 	if plan.WriteSource {
 		if err := storage.SaveSource(paths.SourcePath, source); err != nil {
 			return fmt.Errorf("save config %q: %w", paths.SourcePath, err)
+		}
+	}
+	if plan.WriteHook {
+		if err := storage.SaveHook(paths.HookPath, hook); err != nil {
+			return fmt.Errorf("save hook %q: %w", paths.HookPath, err)
 		}
 	}
 
