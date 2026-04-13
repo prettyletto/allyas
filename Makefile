@@ -19,7 +19,7 @@ clean:
 install: build
 	@if [ -f $(BINARY_NAME) ]; then \
 		echo "Installing $(BINARY_NAME) globally..."; \
-		sudo mv $(BINARY_NAME) /usr/local/bin/; \
+		mv $(BINARY_NAME) /usr/bin/; \
 	else \
 		echo "$(BINARY_NAME) not found! Build it first."; \
 		exit 1; \

@@ -8,11 +8,11 @@ if [ -f %q ]; then
 	. %q
 fi
 
-allyas() {
-	command %s "$@"
-	status=$?
+ax() {
+	ALLYAS_SHELL_WRAPPER=1 command %s "$@"
+	allyas_status=$?
 
-	if [ $status -eq 0 ]; then
+	if [ $allyas_status -eq 0 ]; then
 		case "$1" in
 			create|edit|remove|init)
 				if [ -f %q ]; then
@@ -22,7 +22,7 @@ allyas() {
 		esac
 	fi
 	
-return $status
+return $allyas_status
 }
-		`, sourcePath, sourcePath, binaryName, sourcePath, sourcePath)
+`, sourcePath, sourcePath, binaryName, sourcePath, sourcePath)
 }
