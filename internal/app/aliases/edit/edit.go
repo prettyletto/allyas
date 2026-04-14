@@ -85,7 +85,7 @@ func editAlias(in EditInput) (EditOutput, error) {
 	newAlias.UpdatedAt = time.Now()
 	store.Aliases[matchIndex] = newAlias
 
-	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell)
+	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell, cfg.AliasMode)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
 		return EditOutput{}, fmt.Errorf("save source: %w", err)
 	}

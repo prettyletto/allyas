@@ -141,8 +141,8 @@ func (c *InitCommand) Execute(ctx CommandContext, args []string) error {
 			return fmt.Errorf("check hook file: %w", err)
 		}
 	}
-	suffix := " [plain/tracked]:"
 
+	suffix := " [plain/tracked]:"
 	rawAliasMode, err := c.askOption("input the mode you want aliases to run;", suffix, "plain")
 	if err != nil {
 		return fmt.Errorf("check alias mode input: %w", err)

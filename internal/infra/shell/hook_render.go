@@ -8,6 +8,20 @@ if [ -f %q ]; then
 	. %q
 fi
 
+allyas__run_tracked() {
+	allyas_id="$1"
+	shift
+	allyas_cmd="$1"
+	shift
+
+	eval "$allyas_cmd"
+	allyas_status=$?
+
+	ALLYAS_SHELL_WRAPPER=1 command %s __record "$allyas_id" "$allyas_status" >/dev/null 2>&1 || true
+
+	return $allyas_status
+}
+
 ax() {
 	ALLYAS_SHELL_WRAPPER=1 command %s "$@"
 	allyas_status=$?
@@ -24,5 +38,5 @@ ax() {
 	
 return $allyas_status
 }
-`, sourcePath, sourcePath, binaryName, sourcePath, sourcePath)
+`, sourcePath, sourcePath, binaryName, binaryName, sourcePath, sourcePath)
 }

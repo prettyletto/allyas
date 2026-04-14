@@ -8,7 +8,7 @@ import (
 	"github.com/Prettyletto/Allyas/internal/domain/models"
 )
 
-func RenderSource(store models.Store, defaultGroup, shellName string) string {
+func RenderSource(store models.Store, defaultGroup, shellName string, aliasMode models.AliasMode) string {
 	grouped := make(map[string][]models.Alias, len(store.Aliases))
 
 	for _, a := range store.Aliases {
@@ -44,19 +44,23 @@ func RenderSource(store models.Store, defaultGroup, shellName string) string {
 		})
 
 		for _, alias := range aliases {
-			renderAlias(&b, alias, shellName)
+			renderAlias(&b, alias, shellName, aliasMode)
 		}
 	}
 
 	return b.String()
 }
 
-func renderAlias(b *strings.Builder, alias models.Alias, shellName string) {
-	switch normalizeShell(shellName) {
-	case "posix":
-		renderPosixFunction(b, alias)
-	default:
-		renderPosixFunction(b, alias)
+func renderAlias(b *strings.Builder, alias models.Alias, shellName string, mode models.AliasMode) {
+	if mode == models.Plain {
+		switch normalizeShell(shellName) {
+		case "posix":
+			renderPosixFunction(b, alias)
+		default:
+			renderPosixFunction(b, alias)
+		}
+	} else {
+		renderInternalWrapper(b, alias)
 	}
 }
 
@@ -71,19 +75,40 @@ func normalizeShell(shellName string) string {
 }
 
 func renderPosixFunction(b *strings.Builder, alias models.Alias) {
-	command := strings.TrimSpace(alias.Command)
-	if command == "" {
-		command = ":"
-	}
-	if !commandAcceptsArgs(command) {
-		command += ` "$@"`
-	}
+	command := prepareCommand(alias.Command)
 
 	fmt.Fprintf(b, "%s() {\n", alias.Name)
 	fmt.Fprintf(b, "  %s\n", command)
 	b.WriteString("}\n")
 }
 
+func renderInternalWrapper(b *strings.Builder, alias models.Alias) {
+	command := prepareCommand(alias.Command)
+
+	fmt.Fprintf(b, "%s() {\n", alias.Name)
+	fmt.Fprintf(b, "  allyas__run_tracked %s %s \"$@\"\n", shellQuote(alias.ID), shellQuote(command))
+	b.WriteString("}\n")
+}
+
+func prepareCommand(command string) string {
+	command = strings.TrimSpace(command)
+	if command == "" {
+		command = ":"
+	}
+	if !commandAcceptsArgs(command) {
+		command += ` "$@"`
+	}
+	return command
+}
+
 func commandAcceptsArgs(command string) bool {
 	return strings.Contains(command, "$@") || strings.Contains(command, "$*")
+}
+
+func shellQuote(s string) string {
+	if s == "" {
+		return "''"
+	}
+
+	return "'" + strings.ReplaceAll(s, "'", `'"'"'`) + "'"
 }

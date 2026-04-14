@@ -31,6 +31,8 @@ func main() {
 	d.Register(edit)
 	remove := commands.NewRemoveCommand()
 	d.Register(remove)
+	record := commands.NewRecordCommand()
+	d.Register(record)
 
 	ctx, err := buildCommandContext()
 	if err != nil {

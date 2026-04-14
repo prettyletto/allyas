@@ -51,7 +51,7 @@ func RemoveByName(in InputRemove) (OutputRemove, error) {
 		return OutputRemove{}, fmt.Errorf("theres no alias named: %s", normName)
 	}
 
-	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell)
+	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell, cfg.AliasMode)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
 		return OutputRemove{}, fmt.Errorf("save source: %w", err)
 	}
@@ -89,7 +89,7 @@ func RemoveByGroup(in InputRemove) (OutputRemove, error) {
 	}
 
 	store.Aliases = newAliases
-	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell)
+	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell, cfg.AliasMode)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
 		return OutputRemove{}, fmt.Errorf("save source: %w", err)
 	}

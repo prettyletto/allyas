@@ -36,7 +36,7 @@ func Run(paths InitPaths, plan InitPlan) error {
 		cfg.Shell = string(plan.Shell)
 	}
 
-	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell)
+	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell, cfg.AliasMode)
 	hook := shell.RenderHook(paths.SourcePath, "allyas")
 
 	if plan.WriteConfig {

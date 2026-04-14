@@ -29,8 +29,8 @@ func AskYesNo(in io.Reader, out io.Writer, question string, defaultYes bool) (bo
 	return s == "y" || s == "yes", nil
 }
 
-func AskInput(in io.Reader, out io.Writer, question, suffix, defaultValue string ) (string, error) {
-	fmt.Printf(question, suffix)
+func AskInput(in io.Reader, out io.Writer, question, suffix, defaultValue string) (string, error) {
+	fmt.Fprint(out, question, suffix)
 
 	r := bufio.NewReader(in)
 	line, err := r.ReadString('\n')

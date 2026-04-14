@@ -60,7 +60,7 @@ func createAlias(in CreateInput) (CreateOutput, error) {
 	}
 
 	store.Aliases = append(store.Aliases, *alias)
-	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell)
+	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell, cfg.AliasMode)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
 		return CreateOutput{}, fmt.Errorf("save source: %w", err)
 	}
