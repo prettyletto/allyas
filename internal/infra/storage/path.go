@@ -10,12 +10,16 @@ const (
 	AppDirName     = "allyas"
 	ConfigFileName = "config.json"
 	StoreFileName  = "store.json"
+	StatsFileName  = "allyas_stats.jsonl"
+
 	SourceFileName = "aliases.sh"
 	HookFileName   = "allyas_hook.sh"
 
 	ConfigDirEnv  = "ALLYAS_CONFIG_DIR"
 	ConfigPathEnv = "ALLYAS_CONFIG_PATH"
 	StorePathEnv  = "ALLYAS_STORE_PATH"
+	StatsPathEnv  = "ALLYAS_STATS_PATH"
+
 	SourcePathEnv = "ALLYAS_SOURCE_PATH"
 	HookPathEnv   = "ALLYAS_HOOK_PATH"
 
@@ -112,5 +116,9 @@ func SourcePath() (string, error) {
 }
 
 func HookPath() (string, error) {
-	return resolvePath(HookPathEnv, HookPathEnv, HookFileName)
+	return resolvePath(ConfigDirEnv, HookPathEnv, HookFileName)
+}
+
+func StatsPath() (string, error) {
+	return resolvePath(ConfigDirEnv, StatsPathEnv)
 }

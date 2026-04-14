@@ -24,9 +24,15 @@ func buildCommandContext() (*commands.CommandContext, error) {
 		return nil, err
 	}
 
+	statsPath, err := storage.StatsPath()
+	if err != nil {
+		return nil, err
+	}
+
 	return &commands.CommandContext{
 		ConfigPath: cfgPath,
 		StorePath:  storePath,
+		StatsPath:  statsPath,
 		SourcePath: sourcePath,
 		HookPath:   hookPath,
 	}, nil
