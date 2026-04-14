@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	createapp "github.com/Prettyletto/Allyas/internal/app/aliases/create"
+	"github.com/Prettyletto/Allyas/internal/infra/shell"
 )
 
 type createInput struct {
@@ -114,6 +115,9 @@ func (c *CreateCommand) Execute(ctx CommandContext, args []string) error {
 		return fmt.Errorf("create alias: %w", err)
 	}
 	fmt.Printf("Alias created: %s (%s)\n", out.Name, out.ID)
+	if !shell.RunningFromWrapper() {
+		fmt.Printf("resource from %s\n", ctx.SourcePath)
+	}
 
 	return nil
 }

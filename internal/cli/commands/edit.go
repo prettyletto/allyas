@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Prettyletto/Allyas/internal/app/aliases/edit"
+	"github.com/Prettyletto/Allyas/internal/infra/shell"
 )
 
 type editInput struct {
@@ -125,6 +126,10 @@ func (c *EditCommand) Execute(ctx CommandContext, args []string) error {
 	}
 
 	fmt.Println("alias", out.Name, "edited with success!")
+	if !shell.RunningFromWrapper() {
+		fmt.Printf("resource from %s\n", ctx.SourcePath)
+	}
+
 
 	return nil
 }

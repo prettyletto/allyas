@@ -8,6 +8,7 @@ import (
 
 	"github.com/Prettyletto/Allyas/internal/app/bootstrap"
 	"github.com/Prettyletto/Allyas/internal/cli/ui"
+	"github.com/Prettyletto/Allyas/internal/domain/models"
 	"github.com/Prettyletto/Allyas/internal/infra/shell"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
 )
@@ -17,6 +18,16 @@ var ErrCanceled = errors.New("init canceled")
 type initFlags struct {
 	Force bool
 	Shell shell.Type
+}
+
+func parseAliasMode(s string) (models.AliasMode, error) {
+	mode := models.AliasMode(strings.ToLower(strings.TrimSpace(s)))
+
+	if !mode.Valid() {
+		return "", fmt.Errorf("invalid alias mode %q, expected one of: plain, tracked", s)
+	}
+
+	return mode, nil
 }
 
 func parseShell(s string) (shell.Type, error) {
@@ -73,6 +84,10 @@ func (c *InitCommand) Description() string {
 	and prepare the file to be injected in the shell`
 }
 
+func (c *InitCommand) askOption(question, suffix, defaultValue string) (string, error) {
+	return ui.AskInput(os.Stdin, os.Stdout, question, suffix, defaultValue)
+}
+
 func (c *InitCommand) askWrite(path, prompt string) (bool, error) {
 	exists, err := storage.FileExists(path)
 	if err != nil {
@@ -121,14 +136,25 @@ func (c *InitCommand) Execute(ctx CommandContext, args []string) error {
 		if err != nil {
 			return fmt.Errorf("check source file: %w", err)
 		}
-
 		writeHook, err = c.askWrite(paths.HookPath, "hook file exists; reset to default?")
 		if err != nil {
 			return fmt.Errorf("check hook file: %w", err)
 		}
 	}
+	suffix := " [plain/tracked]:"
+
+	rawAliasMode, err := c.askOption("input the mode you want aliases to run;", suffix, "plain")
+	if err != nil {
+		return fmt.Errorf("check alias mode input: %w", err)
+	}
+
+	aliasMode, err := parseAliasMode(rawAliasMode)
+	if err != nil {
+		return err
+	}
 
 	plan := bootstrap.InitPlan{
+		AliasMode:   aliasMode,
 		Shell:       flags.Shell,
 		WriteConfig: writeCfg,
 		WriteStore:  writeStore,

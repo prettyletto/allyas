@@ -16,6 +16,7 @@ type InitPaths struct {
 }
 
 type InitPlan struct {
+	AliasMode   models.AliasMode
 	Shell       shell.Type
 	WriteConfig bool
 	WriteStore  bool
@@ -26,6 +27,10 @@ type InitPlan struct {
 func Run(paths InitPaths, plan InitPlan) error {
 	cfg := models.DefaultConfig()
 	store := models.DefaultStore()
+
+	if plan.AliasMode.Valid() {
+		cfg.AliasMode = plan.AliasMode
+	}
 
 	if plan.Shell != "" {
 		cfg.Shell = string(plan.Shell)

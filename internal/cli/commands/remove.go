@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Prettyletto/Allyas/internal/app/aliases/remove"
+	"github.com/Prettyletto/Allyas/internal/infra/shell"
 )
 
 type RemoveCommand struct{}
@@ -88,6 +89,9 @@ func (c *RemoveCommand) Execute(ctx CommandContext, args []string) error {
 	}
 
 	fmt.Println(out.Message)
+	if !shell.RunningFromWrapper() {
+		fmt.Printf("resource from %s\n", ctx.SourcePath)
+	}
 
 	return nil
 }
