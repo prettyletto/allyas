@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/Prettyletto/Allyas/internal/app/stats"
@@ -19,7 +18,7 @@ func (c *RecordCommand) Names() []string {
 }
 
 func (c *RecordCommand) Usage() string {
-	return "__record <alias-id> <exit-code>"
+	return "__record <alias-id>"
 }
 
 func (c *RecordCommand) Description() string {
@@ -27,18 +26,13 @@ func (c *RecordCommand) Description() string {
 }
 
 func (c *RecordCommand) Execute(ctx CommandContext, args []string) error {
-	if len(args) < 2 {
-		return fmt.Errorf("alias id and exit code are required")
+	if len(args) < 1 {
+		return fmt.Errorf("alias id is required")
 	}
 
-	exitCode, err := strconv.Atoi(args[1])
-	if err != nil {
-		return fmt.Errorf("invalid exit code %q", args[1])
-	}
 	return stats.Record(stats.RecordInput{
 		StatsPath: ctx.StatsPath,
 		AliasID:   args[0],
-		ExitCode:  exitCode,
 		UsedAt:    time.Now(),
 	})
 }

@@ -74,7 +74,6 @@ func createAlias(in CreateInput) (CreateOutput, error) {
 		if err := stats.RecordDefault(stats.RecordInput{
 			StatsPath: in.StatsPath,
 			AliasID:   alias.ID,
-			ExitCode:  0,
 			UsedAt:    alias.CreatedAt,
 		}); err != nil {
 			return CreateOutput{}, err

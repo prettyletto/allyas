@@ -85,12 +85,6 @@ func PrintDetailed(w io.Writer, items []list.ListOutput) error {
 					return err
 				}
 			}
-
-			if item.LastExitCode != nil {
-				if _, err := fmt.Fprintf(w, "  exit:    %d\n", *item.LastExitCode); err != nil {
-					return err
-				}
-			}
 		}
 	}
 

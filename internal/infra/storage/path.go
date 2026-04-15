@@ -10,7 +10,7 @@ const (
 	AppDirName     = "allyas"
 	ConfigFileName = "config.json"
 	StoreFileName  = "store.json"
-	StatsFileName  = "allyas_stats.jsonl"
+	StatsFileName  = "allyasstats.json"
 
 	SourceFileName = "aliases.sh"
 	HookFileName   = "allyas_hook.sh"

@@ -14,12 +14,8 @@ allyas__run_tracked() {
 	allyas_cmd="$1"
 	shift
 
+	ALLYAS_SHELL_WRAPPER=1 command %s __record "$allyas_id" >/dev/null 2>&1 || true
 	eval "$allyas_cmd"
-	allyas_status=$?
-
-	ALLYAS_SHELL_WRAPPER=1 command %s __record "$allyas_id" "$allyas_status" >/dev/null 2>&1 || true
-
-	return $allyas_status
 }
 
 ax() {

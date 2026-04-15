@@ -52,7 +52,6 @@ type ListOutput struct {
 	UpdatedAt    string
 	UsageCount   int
 	LastUsedAt   string
-	LastExitCode *int
 	ShowStats    bool
 }
 
@@ -148,6 +147,15 @@ func storeToOutput(in models.Alias, options ListOptions, stats models.AliasStats
 		Command: in.Command,
 	}
 
+	if tracked {
+		out.ShowStats = true
+		out.UsageCount = stats.Count
+
+		if hasStats && !stats.LastUsedAt.IsZero() {
+			out.LastUsedAt = stats.LastUsedAt.String()
+		}
+	}
+
 	if options.Compact {
 		return out
 	}
@@ -164,18 +172,6 @@ func storeToOutput(in models.Alias, options ListOptions, stats models.AliasStats
 	if options.Detailed[FieldDates] {
 		out.CreatedAt = in.CreatedAt.String()
 		out.UpdatedAt = in.UpdatedAt.String()
-	}
-
-	if tracked {
-		out.ShowStats = true
-		out.UsageCount = stats.Count
-
-		if hasStats && !stats.LastUsedAt.IsZero() {
-			out.LastUsedAt = stats.LastUsedAt.String()
-			code := stats.LastExitCode
-			out.LastExitCode = &code
-		}
-
 	}
 
 	return out

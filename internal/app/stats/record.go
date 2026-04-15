@@ -10,7 +10,6 @@ import (
 type RecordInput struct {
 	StatsPath string
 	AliasID   string
-	ExitCode  int
 	UsedAt    time.Time
 }
 
@@ -23,7 +22,6 @@ func Record(in RecordInput) error {
 	entry := statsFile.Aliases[in.AliasID]
 	entry.Count++
 	entry.LastUsedAt = in.UsedAt
-	entry.LastExitCode = in.ExitCode
 	statsFile.Aliases[in.AliasID] = entry
 
 	if err := storage.SaveStats(in.StatsPath, statsFile); err != nil {
@@ -42,7 +40,6 @@ func RecordDefault(in RecordInput) error {
 	entry := statsFile.Aliases[in.AliasID]
 	entry.Count = 0
 	entry.LastUsedAt = in.UsedAt
-	entry.LastExitCode = in.ExitCode
 	statsFile.Aliases[in.AliasID] = entry
 
 	if err := storage.SaveStats(in.StatsPath, statsFile); err != nil {
