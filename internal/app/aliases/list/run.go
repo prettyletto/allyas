@@ -27,6 +27,7 @@ const (
 type ListContext struct {
 	SourcePath string
 	StorePath  string
+	StatsPath  string
 	Options    ListOptions
 }
 
@@ -149,6 +150,10 @@ func ListAll(lctx ListContext) ([]ListOutput, error) {
 	if err != nil {
 		return out, fmt.Errorf("load store: %w", err)
 	}
+	// stats, err := storage.LoadStats(lctx.StatsPath)
+	// if err != nil {
+	// 	return out, fmt.Errorf("load stats: %w", err)
+	// }
 
 	for _, a := range store.Aliases {
 		if !matchesFilters(a, lctx.Options) {

@@ -101,6 +101,7 @@ func (c *CreateCommand) Execute(ctx CommandContext, args []string) error {
 	}
 
 	ci := createapp.CreateInput{
+		StatsPath:   ctx.StatsPath,
 		ConfigPath:  ctx.ConfigPath,
 		StorePath:   ctx.StorePath,
 		SourcePath:  ctx.SourcePath,

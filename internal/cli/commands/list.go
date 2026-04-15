@@ -129,9 +129,10 @@ func (c *ListCommand) Description() string {
 }
 
 func (c *ListCommand) Execute(ctx CommandContext, args []string) error {
-	if ctx.StorePath == "" || ctx.SourcePath == "" {
+	if ctx.StorePath == "" || ctx.SourcePath == ""  {
 		return fmt.Errorf("command context is missing store/source paths; try allyas init command")
 	}
+
 	fl, err := parseListArgs(args)
 	if err != nil {
 		return err

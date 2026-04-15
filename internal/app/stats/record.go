@@ -32,3 +32,21 @@ func Record(in RecordInput) error {
 
 	return nil
 }
+
+func RecordDefault(in RecordInput) error {
+	statsFile, err := storage.LoadStats(in.StatsPath)
+	if err != nil {
+		return fmt.Errorf("load stats: %w", err)
+	}
+
+	entry := statsFile.Aliases[in.AliasID]
+	entry.Count = 0
+	entry.LastUsedAt = in.UsedAt
+	entry.LastExitCode = in.ExitCode
+	statsFile.Aliases[in.AliasID] = entry
+
+	if err := storage.SaveStats(in.StatsPath, statsFile); err != nil {
+		return fmt.Errorf("save stats: %w", err)
+	}
+	return nil
+}

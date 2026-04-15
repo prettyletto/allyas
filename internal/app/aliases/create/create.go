@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Prettyletto/Allyas/internal/app/stats"
 	"github.com/Prettyletto/Allyas/internal/domain/models"
 	"github.com/Prettyletto/Allyas/internal/infra/shell"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
@@ -15,6 +16,7 @@ type CreateInput struct {
 	ConfigPath  string
 	StorePath   string
 	SourcePath  string
+	StatsPath   string
 	Name        string
 	Command     string
 	Group       string
@@ -67,6 +69,18 @@ func createAlias(in CreateInput) (CreateOutput, error) {
 	if err := storage.SaveStore(in.StorePath, store); err != nil {
 		return CreateOutput{}, fmt.Errorf("save store: %w", err)
 	}
+
+	if cfg.AliasMode == models.Tracked {
+		if err := stats.RecordDefault(stats.RecordInput{
+			StatsPath: in.StatsPath,
+			AliasID:   alias.ID,
+			ExitCode:  0,
+			UsedAt:    alias.CreatedAt,
+		}); err != nil {
+			return CreateOutput{}, err
+		}
+	}
+
 	return CreateOutput{ID: alias.ID, Name: alias.Name}, nil
 }
 
