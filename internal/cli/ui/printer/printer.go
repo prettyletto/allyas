@@ -71,6 +71,27 @@ func PrintDetailed(w io.Writer, items []list.ListOutput) error {
 				return err
 			}
 		}
+		if item.ShowStats {
+			if _, err := fmt.Fprintf(w, "  usage:   %d\n", item.UsageCount); err != nil {
+				return err
+			}
+
+			if item.LastUsedAt != "" {
+				if _, err := fmt.Fprintf(w, "  last:    %s\n", item.LastUsedAt); err != nil {
+					return err
+				}
+			} else {
+				if _, err := fmt.Fprintln(w, "  last:    never"); err != nil {
+					return err
+				}
+			}
+
+			if item.LastExitCode != nil {
+				if _, err := fmt.Fprintf(w, "  exit:    %d\n", *item.LastExitCode); err != nil {
+					return err
+				}
+			}
+		}
 	}
 
 	return nil

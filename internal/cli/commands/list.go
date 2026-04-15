@@ -33,6 +33,10 @@ func parseSort(s string) (appList.Sort, error) {
 		return appList.SortGroup, nil
 	case "dates":
 		return appList.SortDate, nil
+	case "usage":
+		return appList.SortUsage, nil
+	case "recent":
+		return appList.SortRecent, nil
 	default:
 		return "", fmt.Errorf("invalid sort option: %s", s)
 	}
@@ -74,7 +78,7 @@ func parseListArgs(args []string) (listFlags, error) {
 			i++
 		case "--sort", "-s":
 			if i+1 >= len(args) || strings.HasPrefix(args[i+1], "-") {
-				return fl, fmt.Errorf("%s requires one of: name, group, dates", a)
+				return fl, fmt.Errorf("%s requires one of: name, group, dates,usage, recent", a)
 			}
 			sortValue, err := parseSort(args[i+1])
 			if err != nil {
@@ -129,7 +133,7 @@ func (c *ListCommand) Description() string {
 }
 
 func (c *ListCommand) Execute(ctx CommandContext, args []string) error {
-	if ctx.StorePath == "" || ctx.SourcePath == ""  {
+	if ctx.StorePath == "" || ctx.SourcePath == "" {
 		return fmt.Errorf("command context is missing store/source paths; try allyas init command")
 	}
 
@@ -139,8 +143,10 @@ func (c *ListCommand) Execute(ctx CommandContext, args []string) error {
 	}
 
 	lctx := appList.ListContext{
-		StorePath: ctx.StorePath,
-		Options:   toListOptions(fl),
+		ConfigPath: ctx.ConfigPath,
+		StatsPath:  ctx.StatsPath,
+		StorePath:  ctx.StorePath,
+		Options:    toListOptions(fl),
 	}
 
 	items, err := appList.Run(lctx)

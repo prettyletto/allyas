@@ -19,13 +19,15 @@ const (
 type Sort string
 
 const (
-	SortName  Sort = "name"
-	SortGroup Sort = "group"
-	SortDate  Sort = "dates"
+	SortName   Sort = "name"
+	SortGroup  Sort = "group"
+	SortDate   Sort = "dates"
+	SortUsage  Sort = "usage"
+	SortRecent Sort = "recent"
 )
 
 type ListContext struct {
-	SourcePath string
+	ConfigPath string
 	StorePath  string
 	StatsPath  string
 	Options    ListOptions
@@ -41,13 +43,17 @@ type ListOptions struct {
 }
 
 type ListOutput struct {
-	Name        string
-	Command     string
-	Description string
-	Group       string
-	Tags        []string
-	CreatedAt   string
-	UpdatedAt   string
+	Name         string
+	Command      string
+	Description  string
+	Group        string
+	Tags         []string
+	CreatedAt    string
+	UpdatedAt    string
+	UsageCount   int
+	LastUsedAt   string
+	LastExitCode *int
+	ShowStats    bool
 }
 
 func matchesFilters(a models.Alias, o ListOptions) bool {
@@ -101,6 +107,26 @@ func applySort(items []ListOutput, sortBy Sort) {
 			}
 			return 0
 		})
+	case SortRecent:
+		slices.SortFunc(items, func(a, b ListOutput) int {
+			if a.LastUsedAt > b.LastUsedAt {
+				return -1
+			}
+			if a.LastUsedAt < b.LastUsedAt {
+				return 1
+			}
+			return 0
+		})
+	case SortUsage:
+		slices.SortFunc(items, func(a, b ListOutput) int {
+			if a.UsageCount > b.UsageCount {
+				return 1
+			}
+			if a.UsageCount < b.UsageCount {
+				return -1
+			}
+			return 0
+		})
 	case SortName:
 		fallthrough
 	default:
@@ -116,7 +142,7 @@ func applySort(items []ListOutput, sortBy Sort) {
 	}
 }
 
-func storeToOutput(in models.Alias, options ListOptions) ListOutput {
+func storeToOutput(in models.Alias, options ListOptions, stats models.AliasStats, tracked bool, hasStats bool) ListOutput {
 	out := ListOutput{
 		Name:    in.Name,
 		Command: in.Command,
@@ -140,27 +166,50 @@ func storeToOutput(in models.Alias, options ListOptions) ListOutput {
 		out.UpdatedAt = in.UpdatedAt.String()
 	}
 
+	if tracked {
+		out.ShowStats = true
+		out.UsageCount = stats.Count
+
+		if hasStats && !stats.LastUsedAt.IsZero() {
+			out.LastUsedAt = stats.LastUsedAt.String()
+			code := stats.LastExitCode
+			out.LastExitCode = &code
+		}
+
+	}
+
 	return out
 }
 
 func ListAll(lctx ListContext) ([]ListOutput, error) {
 	var out []ListOutput
 
+	cfg, err := storage.LoadConfig(lctx.ConfigPath)
+	if err != nil {
+		return out, fmt.Errorf("load config: %w", err)
+	}
+
 	store, err := storage.LoadStore(lctx.StorePath)
 	if err != nil {
 		return out, fmt.Errorf("load store: %w", err)
 	}
-	// stats, err := storage.LoadStats(lctx.StatsPath)
-	// if err != nil {
-	// 	return out, fmt.Errorf("load stats: %w", err)
-	// }
+
+	tracked := cfg.AliasMode == models.Tracked
+	statsFile := models.DefaultStatsFile()
+	if tracked {
+		statsFile, err = storage.LoadStats(lctx.StatsPath)
+		if err != nil {
+			return out, fmt.Errorf("load stats: %w", err)
+		}
+	}
 
 	for _, a := range store.Aliases {
 		if !matchesFilters(a, lctx.Options) {
 			continue
 		}
 
-		out = append(out, storeToOutput(a, lctx.Options))
+		aliasStats, ok := statsFile.Aliases[a.ID]
+		out = append(out, storeToOutput(a, lctx.Options, aliasStats, tracked, ok))
 	}
 
 	if lctx.Options.SortBy != "" {
