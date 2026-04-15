@@ -13,6 +13,7 @@ type InitPaths struct {
 	StorePath  string
 	SourcePath string
 	HookPath   string
+	StatsPath  string
 }
 
 type InitPlan struct {
@@ -27,6 +28,7 @@ type InitPlan struct {
 func Run(paths InitPaths, plan InitPlan) error {
 	cfg := models.DefaultConfig()
 	store := models.DefaultStore()
+	stats := models.DefaultStatsFile()
 
 	if plan.AliasMode.Valid() {
 		cfg.AliasMode = plan.AliasMode
@@ -47,6 +49,9 @@ func Run(paths InitPaths, plan InitPlan) error {
 	if plan.WriteStore {
 		if err := storage.SaveStore(paths.StorePath, store); err != nil {
 			return fmt.Errorf("save store %q: %w", paths.StorePath, err)
+		}
+		if err := storage.SaveStats(paths.StatsPath, stats); err != nil {
+			return fmt.Errorf("save stats %q: %w", paths.StatsPath, err)
 		}
 	}
 	if plan.WriteSource {

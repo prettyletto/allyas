@@ -40,7 +40,7 @@ func AskInput(in io.Reader, out io.Writer, question, suffix, defaultValue string
 	s := strings.ToLower(strings.TrimSpace(line))
 
 	if s == "" {
-		return "", nil
+		return defaultValue, nil
 	}
 
 	return s, nil

@@ -2,6 +2,10 @@ package commands
 
 import (
 	"fmt"
+	"strconv"
+	"time"
+
+	"github.com/Prettyletto/Allyas/internal/app/stats"
 )
 
 type RecordCommand struct{}
@@ -27,7 +31,14 @@ func (c *RecordCommand) Execute(ctx CommandContext, args []string) error {
 		return fmt.Errorf("alias id and exit code are required")
 	}
 
-	// Runtime metadata recording will live here. Keep it non-failing for now so
-	// tracked aliases behave like plain aliases until persistence is added.
-	return nil
+	exitCode, err := strconv.Atoi(args[1])
+	if err != nil {
+		return fmt.Errorf("invalid exit code %q", args[1])
+	}
+	return stats.Record(stats.RecordInput{
+		StatsPath: ctx.StatsPath,
+		AliasID:   args[0],
+		ExitCode:  exitCode,
+		UsedAt:    time.Now(),
+	})
 }

@@ -116,6 +116,7 @@ func (c *InitCommand) Execute(ctx CommandContext, args []string) error {
 		StorePath:  ctx.StorePath,
 		SourcePath: ctx.SourcePath,
 		HookPath:   ctx.HookPath,
+		StatsPath:  ctx.StatsPath,
 	}
 
 	writeCfg := true

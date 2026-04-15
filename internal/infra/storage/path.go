@@ -120,5 +120,5 @@ func HookPath() (string, error) {
 }
 
 func StatsPath() (string, error) {
-	return resolvePath(ConfigDirEnv, StatsPathEnv)
+	return resolvePath(ConfigDirEnv, StatsPathEnv, StatsFileName)
 }

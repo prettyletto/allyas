@@ -11,7 +11,7 @@ type AliasStats struct {
 }
 
 type StatsFile struct {
-	SchemaVersion int                   `json:"count"`
+	SchemaVersion int                   `json:"schema_version"`
 	Aliases       map[string]AliasStats `json:"aliases"`
 }
 
