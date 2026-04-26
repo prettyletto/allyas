@@ -32,6 +32,7 @@ type Config struct {
 	AutoInit           bool       `json:"auto_init"`
 	ConfirmBeforeWrite bool       `json:"confirm_write"`
 	Shell              string     `json:"shell"`
+	InstallShell       string     `json:"install_shell"`
 	SourceFile         string     `json:"source_file"`
 	StoreFile          string     `json:"store_file"`
 	Sync               SyncConfig `json:"sync_config"`
@@ -47,6 +48,7 @@ func DefaultConfig() Config {
 		AutoInit:           true,
 		ConfirmBeforeWrite: true,
 		Shell:              "posix",
+		InstallShell:       "",
 		Sync:               SyncConfig{Enabled: false, Provider: "none"},
 	}
 }

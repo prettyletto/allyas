@@ -1,0 +1,2 @@
+- Don't write in this repo unless told.
+- Always use english and treat this repo as a learning point for me but that wants to go to aur packages and omarchy in the future

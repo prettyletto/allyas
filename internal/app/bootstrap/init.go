@@ -16,54 +16,155 @@ type InitPaths struct {
 	StatsPath  string
 }
 
-type InitPlan struct {
-	AliasMode   models.AliasMode
-	Shell       shell.Type
-	WriteConfig bool
-	WriteStore  bool
-	WriteSource bool
-	WriteHook   bool
+type InitOptions struct {
+	Force        bool
+	AliasMode    models.AliasMode
+	InstallShell shell.Type
 }
 
-func Run(paths InitPaths, plan InitPlan) error {
-	cfg := models.DefaultConfig()
-	store := models.DefaultStore()
-	stats := models.DefaultStatsFile()
+type InitFileResult struct {
+	Name   string
+	Path   string
+	Action string
+}
 
-	if plan.AliasMode.Valid() {
-		cfg.AliasMode = plan.AliasMode
+type InitOutput struct {
+	Files []InitFileResult
+}
+
+func Run(paths InitPaths, opts InitOptions) (InitOutput, error) {
+	var out InitOutput
+
+	writeConfig, configAction, err := shouldWrite(paths.ConfigPath, opts.Force)
+	if err != nil {
+		return out, fmt.Errorf("check config %q: %w", paths.ConfigPath, err)
 	}
 
-	if plan.Shell != "" {
-		cfg.Shell = string(plan.Shell)
+	writeStore, storeAction, err := shouldWrite(paths.StorePath, opts.Force)
+	if err != nil {
+		return out, fmt.Errorf("check store %q: %w", paths.StorePath, err)
 	}
 
-	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell, cfg.AliasMode)
-	hook := shell.RenderHook(paths.SourcePath, "allyas")
+	writeSource, sourceAction, err := shouldWrite(paths.SourcePath, opts.Force)
+	if err != nil {
+		return out, fmt.Errorf("check source %q: %w", paths.SourcePath, err)
+	}
 
-	if plan.WriteConfig {
+	writeHook, hookAction, err := shouldWrite(paths.HookPath, opts.Force)
+	if err != nil {
+		return out, fmt.Errorf("check hook %q: %w", paths.HookPath, err)
+	}
+
+	writeStats, statsAction, err := shouldWrite(paths.StatsPath, opts.Force)
+	if err != nil {
+		return out, fmt.Errorf("check stats %q: %w", paths.StatsPath, err)
+	}
+
+	cfg, err := initConfig(paths.ConfigPath, writeConfig, opts)
+	if err != nil {
+		return out, err
+	}
+
+	store, err := initStore(paths.StorePath, writeStore)
+	if err != nil {
+		return out, err
+	}
+
+	if writeConfig {
 		if err := storage.SaveConfig(paths.ConfigPath, cfg); err != nil {
-			return fmt.Errorf("save config %q: %w", paths.ConfigPath, err)
+			return out, fmt.Errorf("save config %q: %w", paths.ConfigPath, err)
 		}
 	}
-	if plan.WriteStore {
+	out.Files = append(out.Files, InitFileResult{
+		Name: "config", Path: paths.ConfigPath,
+		Action: configAction,
+	})
+
+	if writeStore {
 		if err := storage.SaveStore(paths.StorePath, store); err != nil {
-			return fmt.Errorf("save store %q: %w", paths.StorePath, err)
-		}
-		if err := storage.SaveStats(paths.StatsPath, stats); err != nil {
-			return fmt.Errorf("save stats %q: %w", paths.StatsPath, err)
+			return out, fmt.Errorf("save store %q: %w", paths.StorePath, err)
 		}
 	}
-	if plan.WriteSource {
+	out.Files = append(out.Files, InitFileResult{
+		Name: "store", Path: paths.StorePath,
+		Action: storeAction,
+	})
+
+	if writeSource {
+		source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell, cfg.AliasMode)
 		if err := storage.SaveSource(paths.SourcePath, source); err != nil {
-			return fmt.Errorf("save config %q: %w", paths.SourcePath, err)
+			return out, fmt.Errorf("save source %q: %w", paths.SourcePath, err)
 		}
 	}
-	if plan.WriteHook {
+	out.Files = append(out.Files, InitFileResult{
+		Name: "source", Path: paths.SourcePath,
+		Action: sourceAction,
+	})
+
+	if writeHook {
+		hook := shell.RenderHook(paths.SourcePath, "allyas")
 		if err := storage.SaveHook(paths.HookPath, hook); err != nil {
-			return fmt.Errorf("save hook %q: %w", paths.HookPath, err)
+			return out, fmt.Errorf("save hook %q: %w", paths.HookPath, err)
 		}
+	}
+	out.Files = append(out.Files, InitFileResult{Name: "hook", Path: paths.HookPath, Action: hookAction})
+
+	if writeStats {
+		stats := models.DefaultStatsFile()
+		if err := storage.SaveStats(paths.StatsPath, stats); err != nil {
+			return out, fmt.Errorf("save stats %q: %w", paths.StatsPath, err)
+		}
+	}
+	out.Files = append(out.Files, InitFileResult{
+		Name: "stats", Path: paths.StatsPath,
+		Action: statsAction,
+	})
+
+	return out, nil
+}
+
+func shouldWrite(path string, force bool) (bool, string, error) {
+	exists, err := storage.FileExists(path)
+	if err != nil {
+		return false, "", err
 	}
 
-	return nil
+	if force {
+		if exists {
+			return true, "overwritten", nil
+		}
+		return true, "created", nil
+	}
+
+	if exists {
+		return false, "skipped", nil
+	}
+
+	return true, "created", nil
+}
+
+func initConfig(path string, writeConfig bool, opts InitOptions) (models.Config, error) {
+	if !writeConfig {
+		return storage.LoadConfig(path)
+	}
+
+	cfg := models.DefaultConfig()
+
+	if opts.AliasMode.Valid() {
+		cfg.AliasMode = opts.AliasMode
+	}
+
+	if opts.InstallShell != "" {
+		cfg.InstallShell = string(opts.InstallShell)
+	}
+
+	return cfg, nil
+}
+
+func initStore(path string, writeStore bool) (models.Store, error) {
+	if !writeStore {
+		return storage.LoadStore(path)
+	}
+
+	return models.DefaultStore(), nil
 }
