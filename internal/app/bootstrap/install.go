@@ -19,13 +19,18 @@ type InstallOutput struct {
 	AlreadyDone bool
 }
 
-func RenderRCSourceBlock(HookPath string) string {
-	return fmt.Sprintf(`%s
-		if [ -f %q ]; then
-			. %q
-		fi
-		%s
-		`, storage.AllyasRCStart, HookPath, HookPath, storage.AllyasRCEnd)
+func RenderRCSourceBlock(hookPath string) string {
+	return fmt.Sprintf(
+		"%s\n"+
+			"if [ -f %q ]; then\n"+
+			"       . %q\n"+
+			"fi\n"+
+			"%s\n",
+		storage.AllyasRCStart,
+		hookPath,
+		hookPath,
+		storage.AllyasRCEnd,
+	)
 }
 
 func PreviewInstall(in InstallInput) (InstallOutput, string, error) {

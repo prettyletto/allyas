@@ -33,6 +33,8 @@ func main() {
 	d.Register(remove)
 	record := commands.NewRecordCommand()
 	d.Register(record)
+	config := commands.NewConfigCommand()
+	d.Register(config)
 
 	ctx, err := buildCommandContext()
 	if err != nil {

@@ -85,7 +85,7 @@ func (c *InstallCommand) Execute(ctx CommandContext, args []string) error {
 
 	if flags.Manual {
 		fmt.Printf("# Add this block to %s\n\n", out.RCPath)
-		print(block)
+		fmt.Print(block)
 		return nil
 	}
 
