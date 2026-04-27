@@ -1,3 +1,0 @@
-- Don't write in this repo unless told.
-- Always use English and treat this repo as a learning point for me that wants to go to AUR packages and Omarchy in the future.
-- Always show the file we are making or changing, what to write in it, and why.
