@@ -1,66 +1,12 @@
 package commands
 
-// type modeFlags struct {
-// 	Force     bool
-// 	Shell     shell.Type
-// 	AliasMode models.AliasMode
-// }
-//
-// func parseAliasMode(s string) (models.AliasMode, error) {
-// 	mode := models.AliasMode(strings.ToLower(strings.TrimSpace(s)))
-//
-// 	if !mode.Valid() {
-// 		return "", fmt.Errorf("invalid alias mode %q, expected one of: plain, tracked", s)
-// 	}
-//
-// 	return mode, nil
-// }
-//
-// func parseShell(s string) (shell.Type, error) {
-// 	t := shell.Type(s)
-// 	if !t.Valid() {
-// 		return "", fmt.Errorf("unsupported shell: %q", s)
-// 	}
-// 	return t, nil
-// }
-//
-// func parseInitargs(args []string) (initFlags, error) {
-// 	var f initFlags
-//
-// 	for i := 0; i < len(args); i++ {
-// 		a := args[i]
-//
-// 		switch a {
-// 		case "--shell":
-// 			if i+1 >= len(args) || strings.HasPrefix(args[i+1], "-") {
-// 				return f, fmt.Errorf("%s requires value", a)
-// 			}
-// 			sh, err := parseShell(args[i+1])
-// 			if err != nil {
-// 				return f, err
-// 			}
-// 			f.Shell = sh
-// 			i++
-// 		case "--force", "-f":
-// 			f.Force = true
-// 		case "--alias-mode", "--mode":
-// 			if i+1 >= len(args) || strings.HasPrefix(args[i+1], "-") {
-// 				return f, fmt.Errorf("%s requires value", a)
-// 			}
-// 			mode, err := parseAliasMode(args[i+1])
-// 			if err != nil {
-// 				return f, err
-// 			}
-// 			f.AliasMode = mode
-// 			i++
-//
-// 		default:
-// 			return f, fmt.Errorf("unkown arg: %s", a)
-// 		}
-//
-// 	}
-// 	return f, nil
-// }
+import (
+	"fmt"
+
+	appconfig "github.com/Prettyletto/Allyas/internal/app/config"
+	"github.com/Prettyletto/Allyas/internal/domain/models"
+	"github.com/Prettyletto/Allyas/internal/infra/storage"
+)
 
 type ModeCommand struct{}
 
@@ -82,6 +28,37 @@ func (c *ModeCommand) Description() string {
 }
 
 func (c *ModeCommand) Execute(ctx CommandContext, args []string) error {
+	if len(args) == 0 {
+		return printMode(ctx.ConfigPath)
+	}
+	if args[0] != string(models.Plain) && args[0] != string(models.Tracked) {
+		return fmt.Errorf("unknown allyas mode option: %q", args[0])
+	}
+
+	cfg, err := appconfig.Set(appconfig.SetInput{
+		ConfigPath: ctx.ConfigPath,
+		StorePath:  ctx.StorePath,
+		SourcePath: ctx.SourcePath,
+		Key:        "alias_mode",
+		Value:      args[0],
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Updated mode to %s\n", args[0])
+	_ = cfg
+
+	return nil
+}
+
+func printMode(path string) error {
+	cfg, err := storage.LoadConfig(path)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(cfg.AliasMode)
 
 	return nil
 }
