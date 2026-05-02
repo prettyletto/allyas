@@ -18,6 +18,7 @@ type InitPaths struct {
 
 type InitOptions struct {
 	Force        bool
+	ForceTargets map[string]bool
 	AliasMode    models.AliasMode
 	InstallShell shell.Type
 }
@@ -35,27 +36,27 @@ type InitOutput struct {
 func Run(paths InitPaths, opts InitOptions) (InitOutput, error) {
 	var out InitOutput
 
-	writeConfig, configAction, err := shouldWrite(paths.ConfigPath, opts.Force)
+	writeConfig, configAction, err := shouldWrite(paths.ConfigPath, shouldForce(opts, "config"))
 	if err != nil {
 		return out, fmt.Errorf("check config %q: %w", paths.ConfigPath, err)
 	}
 
-	writeStore, storeAction, err := shouldWrite(paths.StorePath, opts.Force)
+	writeStore, storeAction, err := shouldWrite(paths.StorePath, shouldForce(opts, "store"))
 	if err != nil {
 		return out, fmt.Errorf("check store %q: %w", paths.StorePath, err)
 	}
 
-	writeSource, sourceAction, err := shouldWrite(paths.SourcePath, opts.Force)
+	writeSource, sourceAction, err := shouldWrite(paths.SourcePath, shouldForce(opts, "source"))
 	if err != nil {
 		return out, fmt.Errorf("check source %q: %w", paths.SourcePath, err)
 	}
 
-	writeHook, hookAction, err := shouldWrite(paths.HookPath, opts.Force)
+	writeHook, hookAction, err := shouldWrite(paths.HookPath, shouldForce(opts, "hook"))
 	if err != nil {
 		return out, fmt.Errorf("check hook %q: %w", paths.HookPath, err)
 	}
 
-	writeStats, statsAction, err := shouldWrite(paths.StatsPath, opts.Force)
+	writeStats, statsAction, err := shouldWrite(paths.StatsPath, shouldForce(opts, "stats"))
 	if err != nil {
 		return out, fmt.Errorf("check stats %q: %w", paths.StatsPath, err)
 	}
@@ -121,6 +122,10 @@ func Run(paths InitPaths, opts InitOptions) (InitOutput, error) {
 	})
 
 	return out, nil
+}
+
+func shouldForce(opts InitOptions, name string) bool {
+	return opts.Force || opts.ForceTargets[name]
 }
 
 func shouldWrite(path string, force bool) (bool, string, error) {

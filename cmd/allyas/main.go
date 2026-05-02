@@ -37,6 +37,8 @@ func main() {
 	d.Register(config)
 	mode := commands.NewModeCommand()
 	d.Register(mode)
+	importCmd := commands.NewImportCommand()
+	d.Register(importCmd)
 
 	ctx, err := buildCommandContext()
 	if err != nil {

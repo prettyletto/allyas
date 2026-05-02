@@ -13,9 +13,10 @@ import (
 var ErrCanceled = errors.New("init canceled")
 
 type initFlags struct {
-	Force     bool
-	Shell     shell.Type
-	AliasMode models.AliasMode
+	Force        bool
+	ForceTargets map[string]bool
+	Shell        shell.Type
+	AliasMode    models.AliasMode
 }
 
 func parseAliasMode(s string) (models.AliasMode, error) {
@@ -36,8 +37,19 @@ func parseShell(s string) (shell.Type, error) {
 	return t, nil
 }
 
+func parseInitForceTarget(s string) (string, error) {
+	target := strings.ToLower(strings.TrimSpace(s))
+	switch target {
+	case "config", "store", "source", "hook", "stats":
+		return target, nil
+	default:
+		return "", fmt.Errorf("invalid force target %q, expected one of: config, store, source, hook, stats", s)
+	}
+}
+
 func parseInitargs(args []string) (initFlags, error) {
 	var f initFlags
+	f.ForceTargets = map[string]bool{}
 
 	for i := 0; i < len(args); i++ {
 		a := args[i]
@@ -54,6 +66,15 @@ func parseInitargs(args []string) (initFlags, error) {
 			f.Shell = sh
 			i++
 		case "--force", "-f":
+			if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
+				target, err := parseInitForceTarget(args[i+1])
+				if err != nil {
+					return f, err
+				}
+				f.ForceTargets[target] = true
+				i++
+				continue
+			}
 			f.Force = true
 		case "--alias-mode", "--mode":
 			if i+1 >= len(args) || strings.HasPrefix(args[i+1], "-") {
@@ -85,7 +106,7 @@ func (c *InitCommand) Names() []string {
 }
 
 func (c *InitCommand) Usage() string {
-	return "init"
+	return "init [--force|-f [config|store|source|hook|stats]] [--shell bash|zsh] [--alias-mode plain|tracked]"
 }
 
 func (c *InitCommand) Description() string {
@@ -109,6 +130,7 @@ func (c *InitCommand) Execute(ctx CommandContext, args []string) error {
 
 	out, err := bootstrap.Run(paths, bootstrap.InitOptions{
 		Force:        flags.Force,
+		ForceTargets: flags.ForceTargets,
 		AliasMode:    flags.AliasMode,
 		InstallShell: flags.Shell,
 	})

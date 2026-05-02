@@ -74,9 +74,14 @@ func normalizeShell(shellName string) string {
 	}
 }
 
+func renderUnalias(b *strings.Builder, name string) {
+	fmt.Fprintf(b, "unalias %s >/dev/null 2>&1 || true\n", name)
+}
+
 func renderPosixFunction(b *strings.Builder, alias models.Alias) {
 	command := prepareCommand(alias.Command)
 
+	renderUnalias(b, alias.Name)
 	fmt.Fprintf(b, "%s() {\n", alias.Name)
 	fmt.Fprintf(b, "  %s\n", command)
 	b.WriteString("}\n")
@@ -85,6 +90,7 @@ func renderPosixFunction(b *strings.Builder, alias models.Alias) {
 func renderInternalWrapper(b *strings.Builder, alias models.Alias) {
 	command := prepareCommand(alias.Command)
 
+	renderUnalias(b, alias.Name)
 	fmt.Fprintf(b, "%s() {\n", alias.Name)
 	fmt.Fprintf(b, "  allyas__run_tracked %s %s \"$@\"\n", shellQuote(alias.ID), shellQuote(command))
 	b.WriteString("}\n")
