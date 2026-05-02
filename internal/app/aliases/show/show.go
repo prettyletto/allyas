@@ -6,6 +6,7 @@ import (
 
 	"github.com/Prettyletto/Allyas/internal/domain/models"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
+	"github.com/Prettyletto/Allyas/internal/shared/datetime"
 )
 
 type ShowInput struct {
@@ -57,8 +58,8 @@ func Run(in ShowInput) (ShowOutput, error) {
 			Group:       a.Group,
 			Description: a.Description,
 			Tags:        a.Tags,
-			CreatedAt:   a.CreatedAt.String(),
-			UpdatedAt:   a.UpdatedAt.String(),
+			CreatedAt:   datetime.Format(a.CreatedAt),
+			UpdatedAt:   datetime.Format(a.UpdatedAt),
 		}
 
 		if cfg.AliasMode == models.Tracked {
@@ -73,7 +74,7 @@ func Run(in ShowInput) (ShowOutput, error) {
 			if ok {
 				out.UsageCount = stats.Count
 				if !stats.LastUsedAt.IsZero() {
-					out.LastUsedAt = stats.LastUsedAt.String()
+					out.LastUsedAt = datetime.Format(stats.LastUsedAt)
 				}
 			}
 		}

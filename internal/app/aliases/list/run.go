@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/Prettyletto/Allyas/internal/domain/models"
 	"github.com/Prettyletto/Allyas/internal/infra/storage"
+	"github.com/Prettyletto/Allyas/internal/shared/datetime"
 )
 
 const (
@@ -43,16 +45,19 @@ type ListOptions struct {
 }
 
 type ListOutput struct {
-	Name         string
-	Command      string
-	Description  string
-	Group        string
-	Tags         []string
-	CreatedAt    string
-	UpdatedAt    string
-	UsageCount   int
-	LastUsedAt   string
-	ShowStats    bool
+	Name        string
+	Command     string
+	Description string
+	Group       string
+	Tags        []string
+	CreatedAt   string
+	UpdatedAt   string
+	UsageCount  int
+	LastUsedAt  string
+	ShowStats   bool
+	createdAt   time.Time
+	updatedAt   time.Time
+	lastUsedAt  time.Time
 }
 
 func matchesFilters(a models.Alias, o ListOptions) bool {
@@ -98,20 +103,20 @@ func applySort(items []ListOutput, sortBy Sort) {
 		})
 	case SortDate:
 		slices.SortFunc(items, func(a, b ListOutput) int {
-			if a.UpdatedAt > b.UpdatedAt {
+			if a.updatedAt.After(b.updatedAt) {
 				return -1
 			}
-			if a.UpdatedAt < b.UpdatedAt {
+			if a.updatedAt.Before(b.updatedAt) {
 				return 1
 			}
 			return 0
 		})
 	case SortRecent:
 		slices.SortFunc(items, func(a, b ListOutput) int {
-			if a.LastUsedAt > b.LastUsedAt {
+			if a.lastUsedAt.After(b.lastUsedAt) {
 				return -1
 			}
-			if a.LastUsedAt < b.LastUsedAt {
+			if a.lastUsedAt.Before(b.lastUsedAt) {
 				return 1
 			}
 			return 0
@@ -143,16 +148,19 @@ func applySort(items []ListOutput, sortBy Sort) {
 
 func storeToOutput(in models.Alias, options ListOptions, stats models.AliasStats, tracked bool, hasStats bool) ListOutput {
 	out := ListOutput{
-		Name:    in.Name,
-		Command: in.Command,
+		Name:      in.Name,
+		Command:   in.Command,
+		createdAt: in.CreatedAt,
+		updatedAt: in.UpdatedAt,
 	}
 
 	if tracked {
 		out.ShowStats = true
 		out.UsageCount = stats.Count
+		out.lastUsedAt = stats.LastUsedAt
 
 		if hasStats && !stats.LastUsedAt.IsZero() {
-			out.LastUsedAt = stats.LastUsedAt.String()
+			out.LastUsedAt = datetime.Format(stats.LastUsedAt)
 		}
 	}
 
@@ -170,8 +178,8 @@ func storeToOutput(in models.Alias, options ListOptions, stats models.AliasStats
 		out.Tags = in.Tags
 	}
 	if options.Detailed[FieldDates] {
-		out.CreatedAt = in.CreatedAt.String()
-		out.UpdatedAt = in.UpdatedAt.String()
+		out.CreatedAt = datetime.Format(in.CreatedAt)
+		out.UpdatedAt = datetime.Format(in.UpdatedAt)
 	}
 
 	return out

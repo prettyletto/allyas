@@ -61,6 +61,14 @@ func (c *ShowCommand) Execute(ctx CommandContext, args []string) error {
 		fmt.Printf("tags: %v\n", out.Tags)
 	}
 
+	if out.CreatedAt != "" {
+		fmt.Printf("created: %s\n", out.CreatedAt)
+	}
+
+	if out.UpdatedAt != "" {
+		fmt.Printf("updated: %s\n", out.UpdatedAt)
+	}
+
 	if out.ShowStats {
 		fmt.Printf("usage: %d\n", out.UsageCount)
 		if out.LastUsedAt != "" {
