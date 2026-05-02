@@ -125,11 +125,11 @@ func (c *ListCommand) Names() []string {
 }
 
 func (c *ListCommand) Usage() string {
-	return "list"
+	return "list [--compact|--full] [--description] [--dates] [--group G] [--tags T] [--sort name|group|dates|usage|recent]"
 }
 
 func (c *ListCommand) Description() string {
-	return "list all registered aliases by allyas"
+	return "List managed functions with optional filters, fields, and sorting"
 }
 
 func (c *ListCommand) Execute(ctx CommandContext, args []string) error {

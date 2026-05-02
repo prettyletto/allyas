@@ -54,11 +54,11 @@ func (c *RemoveCommand) Names() []string {
 }
 
 func (c *RemoveCommand) Usage() string {
-	return "remove <name> [--group G]"
+	return "remove <name>|--group G"
 }
 
 func (c *RemoveCommand) Description() string {
-	return `Remove a stored alias or Group and take it re-source it`
+	return "Remove one managed function or every function in a group"
 }
 
 func (c *RemoveCommand) Execute(ctx CommandContext, args []string) error {

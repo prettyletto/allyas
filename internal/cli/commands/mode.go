@@ -19,12 +19,11 @@ func (c *ModeCommand) Names() []string {
 }
 
 func (c *ModeCommand) Usage() string {
-	return "allyas mode"
+	return "mode [plain|tracked]"
 }
 
 func (c *ModeCommand) Description() string {
-	return `Configure the files needed to the app run locally 
-	and prepare the file to be injected in the shell`
+	return "Show or change how Allyas renders managed functions"
 }
 
 func (c *ModeCommand) Execute(ctx CommandContext, args []string) error {

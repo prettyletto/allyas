@@ -19,11 +19,11 @@ func (c *ConfigCommand) Names() []string {
 }
 
 func (c *ConfigCommand) Usage() string {
-	return "config [get <key>|set <key> <value>]"
+	return "config [show|get <key>|set <key> <value>]"
 }
 
 func (c *ConfigCommand) Description() string {
-	return `Show and update Allyas configuration`
+	return "Show or update Allyas configuration"
 }
 
 func (c *ConfigCommand) Execute(ctx CommandContext, args []string) error {

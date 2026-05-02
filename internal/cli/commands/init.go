@@ -110,8 +110,7 @@ func (c *InitCommand) Usage() string {
 }
 
 func (c *InitCommand) Description() string {
-	return `Configure the files needed to the app run locally 
-	and prepare the file to be injected in the shell`
+	return "Create Allyas config, store, source, hook, and stats files"
 }
 
 func (c *InitCommand) Execute(ctx CommandContext, args []string) error {

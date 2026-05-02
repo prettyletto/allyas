@@ -84,7 +84,7 @@ func (c *CreateCommand) Usage() string {
 }
 
 func (c *CreateCommand) Description() string {
-	return `Create a new alias to be sourced into the shell`
+	return "Create a managed POSIX function from a command"
 }
 
 func (c *CreateCommand) Execute(ctx CommandContext, args []string) error {

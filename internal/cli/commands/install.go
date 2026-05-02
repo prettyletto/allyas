@@ -53,12 +53,11 @@ func (c *InstallCommand) Names() []string {
 }
 
 func (c *InstallCommand) Usage() string {
-	return "allyas install [--shel bash|zsh] [--manual|--auto]"
+	return "install [--shell bash|zsh] [--manual|--auto]"
 }
 
 func (c *InstallCommand) Description() string {
-	return `Install the hook necessary to run the allyas in the shell or prints the commands for manual isntall
-	`
+	return "Install the shell hook automatically or print the manual install block"
 }
 
 func (c *InstallCommand) Execute(ctx CommandContext, args []string) error {

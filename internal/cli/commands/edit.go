@@ -86,12 +86,11 @@ func (c *EditCommand) Names() []string {
 }
 
 func (c *EditCommand) Usage() string {
-	return `edit <current-name> [--name|-n NEW_NAME] [--command|-c NEW_COMMAND] 
-	[--description|-d NEW_DESCRIPTION] [--group|-g NEW_GROUP] [--tags|-t TAGS]`
+	return "edit <current-name> [--name N] [--command C] [--description D] [--group G] [--tags T]"
 }
 
 func (c *EditCommand) Description() string {
-	return `Edit an existing alias and rewrite the source file`
+	return "Edit an existing managed function and rewrite the source file"
 }
 
 func (c *EditCommand) Execute(ctx CommandContext, args []string) error {
@@ -129,7 +128,6 @@ func (c *EditCommand) Execute(ctx CommandContext, args []string) error {
 	if !shell.RunningFromWrapper() {
 		fmt.Printf("resource from %s\n", ctx.SourcePath)
 	}
-
 
 	return nil
 }

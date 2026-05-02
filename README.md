@@ -1,121 +1,416 @@
+# Allyas
 
-# Allyas Manager
+Allyas is a small Go CLI for managing shell shortcuts as POSIX functions.
 
-Alias Manager is a simple CLI tool written in Go that helps you manage your shell aliases. It allows you to store aliases in an `ally_aliases` file and source them into your default shell configuration file. The tool automatically detects the shell you're using by checking the `$SHELL` environment variable.
+Instead of leaving commands scattered through `.bashrc`, `.zshrc`, or an old aliases file, Allyas keeps them in a JSON store and renders a shell source file. In tracked mode, each managed function runs through Allyas first, so usage can be recorded before the command executes.
 
-## Project Structure
+This project is intentionally simple and local-first. That makes it a good learning base for shell integration, Go CLIs, and future packaging work such as AUR or Omarchy-style setups.
 
-The codebase follows an internal layered layout:
+## What Allyas Owns
 
-- `cmd/allyas`: entrypoint and dependency wiring
-- `internal/cli/commands`: CLI command contracts and command handlers
-- `internal/app/dispatch`: command dispatch orchestration
-- `internal/domain/models`: core entities and domain models
-- `internal/infra/storage`: storage/path adapters
-- `internal/shared/text`: cross-cutting text normalization helpers
+Allyas stores entries like this:
 
-Placement and responsibility rules are documented in `docs/ARCHITECTURE_MAP.md`.
-
-## Installation
-
-### Requirements
-
-- [Go](https://golang.org/) (Go 1.19 or higher)
-- [Make](https://www.gnu.org/software/make/)
-
-### Steps to Install
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/prettyletto/allyas.git
-   cd allyas
-   ```
-
-2. Build the tool using `make`:
-
-   ```bash
-   make
-   ```
-
-3. (Optional) To install the tool globally, move the compiled binary to a directory in your `PATH`:
-
-   ```bash
-   sudo make install
-   ```
-
-Now you can use `allyas` from any directory.
-
-## Usage
-
-The tool provides several commands. Here's how to use them:
-
-### `create`
-
-The `create` command allows you to add a new alias.
-
-**Input:**
-
-```bash
-allyas create alias_name "command" ["#description"]
+```text
+name: gs
+command: git status
+group: git
 ```
 
-**Output:**
+Then it renders a shell function:
 
-This will create the following entry in the `ally_aliases` file:
-
-```bash
-#description
-alias your_alias="your_command"
+```sh
+gs() {
+  git status "$@"
+}
 ```
 
-### `list`
+In tracked mode it renders a wrapper that records usage first:
 
-The `list` command shows all the aliases in the `ally_aliases` file.
-
-**Usage:**
-
-```bash
-allyas list
+```sh
+gs() {
+  allyas__run_tracked 'alias-id' 'git status "$@"' "$@"
+}
 ```
 
-This will display all the aliases currently stored in the `ally_aliases` file, along with their descriptions.
+Allyas also emits `unalias <name>` before defining a function. This prevents zsh from crashing when an old shell alias with the same name already exists.
 
-### `edit`
+## Install From Source
 
-The `edit` command allows you to modify an existing alias.
+Requirements:
 
-**Usage:**
+- Go 1.24 or newer
+- Make
+- Bash or zsh for automatic shell install
 
-```bash
-allyas edit old_name option new_value
+Build:
+
+```sh
+make build
 ```
 
-- **`option`**: The option you want to modify:
-  - **`--a`**: Edit the alias name.
-  - **`--c`**: Edit the command associated with the alias.
-  - **`--d`**: Edit the description for the alias.
+Install globally:
 
----
-
-### `remove`
-
-The `remove` command allows you to delete an alias.
-
-**Usage:**
-
-```bash
-allyas remove alias_name
+```sh
+sudo make install
 ```
 
-**Example:**
+The binary name is:
 
-```bash
-allyas remove my_alias
+```sh
+allyas
 ```
 
-This will delete the `my_alias` entry from the `ally_aliases` file.
+After shell installation, the hook also defines:
 
----
+```sh
+ax
+```
 
+`ax` is a shell wrapper around `allyas`. Use it inside your terminal session when you want commands like `create`, `edit`, `remove`, `import`, or `init` to re-source the generated file immediately.
 
+## First Setup
+
+Create Allyas files:
+
+```sh
+allyas init
+```
+
+Create files in tracked mode:
+
+```sh
+allyas init --alias-mode tracked
+```
+
+Install the shell hook automatically:
+
+```sh
+allyas install --shell zsh --auto
+```
+
+Or print the block to add manually:
+
+```sh
+allyas install --shell zsh --manual
+```
+
+Restart your shell, or source your rc file:
+
+```sh
+source ~/.zshrc
+```
+
+After that, prefer:
+
+```sh
+ax create gs "git status"
+```
+
+instead of:
+
+```sh
+allyas create gs "git status"
+```
+
+Both write the same data, but `ax` reloads the generated shell source in the current session after successful writes.
+
+## Daily Use
+
+Create a managed function:
+
+```sh
+ax create gs "git status" --group git --description "Show repository status" --tag git
+```
+
+Run it like a normal shell function:
+
+```sh
+gs
+```
+
+Show one entry:
+
+```sh
+ax show gs
+```
+
+List entries:
+
+```sh
+ax list
+```
+
+Detailed list:
+
+```sh
+ax list --full
+```
+
+Show dates:
+
+```sh
+ax list --dates
+```
+
+Filter by group:
+
+```sh
+ax list --group git
+```
+
+Filter by tag:
+
+```sh
+ax list --tag docker
+```
+
+Sort by recent use:
+
+```sh
+ax list --full --sort recent
+```
+
+Search with shell tools:
+
+```sh
+ax list --full | grep "git"
+```
+
+Edit an entry:
+
+```sh
+ax edit gs --command "git status --short"
+```
+
+Rename an entry:
+
+```sh
+ax edit gs --name gst
+```
+
+Remove one entry:
+
+```sh
+ax remove gst
+```
+
+Remove a whole group:
+
+```sh
+ax remove --group git
+```
+
+## Import Existing Dotfiles
+
+Import aliases or simple POSIX functions from a file:
+
+```sh
+ax import ~/.aliases
+```
+
+Preview without writing:
+
+```sh
+ax import ~/.aliases --dry-run
+```
+
+Import into a group:
+
+```sh
+ax import ~/.aliases --group imported
+```
+
+Fail on name conflicts:
+
+```sh
+ax import ~/.aliases --on-conflict fail
+```
+
+By default, conflicts are skipped.
+
+Important shell ownership rule: if your `.zshrc` or `.bashrc` still sources the old dotfile after Allyas, those old definitions can override Allyas functions. To let Allyas own the calls, remove or comment the old source line after import.
+
+Example old rc line:
+
+```sh
+source ~/.aliases
+```
+
+Keep the Allyas install block, then let Allyas render the managed functions.
+
+## Modes
+
+Show the current mode:
+
+```sh
+allyas mode
+```
+
+Use plain mode:
+
+```sh
+ax mode plain
+```
+
+Plain mode renders direct POSIX functions.
+
+Use tracked mode:
+
+```sh
+ax mode tracked
+```
+
+Tracked mode renders functions that call `allyas__run_tracked` before running the command. This enables usage count and last-used output.
+
+## Configuration
+
+Print the full config:
+
+```sh
+allyas config
+```
+
+Get one value:
+
+```sh
+allyas config get alias_mode
+```
+
+Set one value:
+
+```sh
+ax config set default_group general
+```
+
+Supported config keys:
+
+- `default_group`
+- `shell`
+- `install_shell`
+- `alias_mode`
+- `auto_init`
+- `confirm_write`
+
+Changing `default_group`, `shell`, or `alias_mode` regenerates the source file.
+
+## Rebuilding Specific Init Files
+
+Rewrite every Allyas-managed file:
+
+```sh
+allyas init --force
+```
+
+Rewrite only the hook:
+
+```sh
+allyas init --force hook
+```
+
+Valid force targets:
+
+- `config`
+- `store`
+- `source`
+- `hook`
+- `stats`
+
+This is useful when a generated file changes but you do not want to overwrite the store or config.
+
+## Command Reference
+
+```text
+allyas help [command]
+```
+
+Commands:
+
+```text
+config   config [show|get <key>|set <key> <value>]
+create   create <name> <command> [--group G] [--description D] [--tag T]
+edit     edit <current-name> [--name N] [--command C] [--description D] [--group G] [--tags T]
+help     help [command]
+import   import <file> [--group G] [--dry-run] [--on-conflict skip|fail]
+init     init [--force|-f [config|store|source|hook|stats]] [--shell bash|zsh] [--alias-mode plain|tracked]
+install  install [--shell bash|zsh] [--manual|--auto]
+list     list [--compact|--full] [--description] [--dates] [--group G] [--tags T] [--sort name|group|dates|usage|recent]
+mode     mode [plain|tracked]
+remove   remove <name>|--group G
+show     show <name>
+```
+
+`__record` is an internal command used by tracked mode and is not meant to be called by hand.
+
+## Files
+
+By default, Allyas writes under your user config directory:
+
+```text
+~/.config/allyas/config.json
+~/.config/allyas/store.json
+~/.config/allyas/aliases.sh
+~/.config/allyas/allyas_hook.sh
+~/.config/allyas/allyasstats.json
+```
+
+Path environment variables:
+
+```text
+ALLYAS_CONFIG_DIR
+ALLYAS_CONFIG_PATH
+ALLYAS_STORE_PATH
+ALLYAS_SOURCE_PATH
+ALLYAS_HOOK_PATH
+ALLYAS_STATS_PATH
+```
+
+These are useful for tests, local experiments, or packaging.
+
+## Project Layout
+
+```text
+cmd/allyas
+```
+
+Entrypoint and command wiring.
+
+```text
+internal/cli/commands
+```
+
+CLI command parsing and user-facing output.
+
+```text
+internal/app
+```
+
+Application behavior: create, edit, list, remove, show, import, config, stats, and bootstrap.
+
+```text
+internal/domain/models
+```
+
+Core data structures such as config, store, aliases, and stats.
+
+```text
+internal/infra
+```
+
+Filesystem storage and shell rendering.
+
+```text
+internal/shared
+```
+
+Small shared helpers such as name normalization and date formatting.
+
+## Packaging Notes
+
+For a future AUR package or Omarchy setup, the useful separation is:
+
+- package installs the `allyas` binary
+- user runs `allyas init`
+- user runs `allyas install --shell zsh --auto` or adds the manual block
+- user data stays in the user config directory
+
+The package should not own or overwrite a user's shell rc file directly. Allyas already has an explicit install command for that user-level step.

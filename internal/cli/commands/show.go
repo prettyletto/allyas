@@ -21,7 +21,7 @@ func (c *ShowCommand) Usage() string {
 }
 
 func (c *ShowCommand) Description() string {
-	return "show one alias by name in full information"
+	return "Show full information for one managed function"
 }
 
 func (c *ShowCommand) Execute(ctx CommandContext, args []string) error {
