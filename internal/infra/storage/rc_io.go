@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/infra/shell"
+	"github.com/prettyletto/allyas/internal/infra/shell"
 )
 
 const (
@@ -61,5 +61,5 @@ func AppendRCBlock(path, block string) error {
 
 	content += "\n" + block
 
-	return os.WriteFile(path, []byte(content), WritePerm)
+	return writeFileAtomic(path, []byte(content), WritePerm)
 }

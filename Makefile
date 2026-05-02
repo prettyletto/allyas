@@ -1,45 +1,33 @@
-
-BINARY_NAME = allyas
-SRC_DIR = cmd/allyas
+BINARY_NAME := allyas
+SRC_DIR := ./cmd/allyas
+PREFIX ?= /usr/local
+BINDIR ?= $(PREFIX)/bin
 
 .DEFAULT_GOAL := all
 
-.PHONY: all build clean install run help
+.PHONY: all build clean install run test fmt vet check
 
 all: build
 
 build:
-	@echo "Building the $(BINARY_NAME) binary..."
-	go build -o $(BINARY_NAME) ./$(SRC_DIR)
+	go build -trimpath -o $(BINARY_NAME) $(SRC_DIR)
+
+test:
+	go test ./...
+
+fmt:
+	go fmt ./...
+
+vet:
+	go vet ./...
+
+check: fmt vet test
 
 clean:
-	@echo "Cleaning up..."
 	rm -f $(BINARY_NAME)
 
 install: build
-	@if [ -f $(BINARY_NAME) ]; then \
-		echo "Installing $(BINARY_NAME) globally..."; \
-		mv $(BINARY_NAME) /usr/bin/; \
-	else \
-		echo "$(BINARY_NAME) not found! Build it first."; \
-		exit 1; \
-	fi
+	install -Dm755 $(BINARY_NAME) "$(DESTDIR)$(BINDIR)/$(BINARY_NAME)"
 
-run:
-	@if [ -f $(BINARY_NAME) ]; then \
-		echo "Running $(BINARY_NAME)..."; \
-		./$(BINARY_NAME); \
-	else \
-		echo "$(BINARY_NAME) not found! Build it first."; \
-		exit 1; \
-	fi
-
-help:
-	@echo "Makefile commands:"
-	@echo "  all        - Build the binary (default target)"
-	@echo "  build      - Build the binary from the source"
-	@echo "  clean      - Clean build artifacts"
-	@echo "  install    - Install the binary globally"
-	@echo "  run        - Run the application"
-	@echo "  help       - Show this help message"
-
+run: build
+	./$(BINARY_NAME)

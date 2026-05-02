@@ -2,4 +2,7 @@ cmd/cmd
 .allyas
 .AGENTS.md
 AGENTS.md
-
+*.swp
+*.swo
+.*.swp
+.*.swo

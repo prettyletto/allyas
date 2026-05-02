@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/app/bootstrap"
-	"github.com/Prettyletto/Allyas/internal/infra/shell"
+	"github.com/prettyletto/allyas/internal/app/bootstrap"
+	"github.com/prettyletto/allyas/internal/infra/shell"
 )
 
 type InstallCommand struct{}
@@ -15,7 +15,7 @@ type InstallFlags struct {
 	Manual bool
 }
 
-func pasrseInstallArgs(args []string) (InstallFlags, error) {
+func parseInstallArgs(args []string) (InstallFlags, error) {
 	var f InstallFlags
 	f.Manual = true
 
@@ -38,7 +38,7 @@ func pasrseInstallArgs(args []string) (InstallFlags, error) {
 		case "--manual", "-m":
 			f.Manual = true
 		default:
-			return f, fmt.Errorf("unkown arg: %s", a)
+			return f, fmt.Errorf("unknown arg: %s", a)
 		}
 	}
 	return f, nil
@@ -61,7 +61,7 @@ func (c *InstallCommand) Description() string {
 }
 
 func (c *InstallCommand) Execute(ctx CommandContext, args []string) error {
-	flags, err := pasrseInstallArgs(args)
+	flags, err := parseInstallArgs(args)
 	if err != nil {
 		return err
 	}

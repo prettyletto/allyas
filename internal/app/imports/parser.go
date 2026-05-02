@@ -14,6 +14,7 @@ type ParsedEntry struct {
 var (
 	aliasLine = regexp.MustCompile(`^\s*alias\s+([A-Za-z_][A-Za-z0-9_]*)=(.*)$`)
 	fnStart   = regexp.MustCompile(`^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\(\)\s*\{\s*$`)
+	fnOneLine = regexp.MustCompile(`^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\(\)\s*\{\s*(.*?)\s*;\s*\}\s*$`)
 )
 
 func Parse(content string) ([]ParsedEntry, error) {
@@ -29,6 +30,15 @@ func Parse(content string) ([]ParsedEntry, error) {
 			cmd := strings.TrimSpace(m[2])
 			cmd = strings.Trim(cmd, `"'`)
 			entries = append(entries, ParsedEntry{Name: m[1], Command: cmd})
+			continue
+		}
+
+		if m := fnOneLine.FindStringSubmatch(lines[i]); m != nil {
+			command := strings.TrimSpace(m[2])
+			if command == "" {
+				command = ":"
+			}
+			entries = append(entries, ParsedEntry{Name: m[1], Command: command})
 			continue
 		}
 

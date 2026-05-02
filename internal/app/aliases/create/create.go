@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/app/stats"
-	"github.com/Prettyletto/Allyas/internal/domain/models"
-	"github.com/Prettyletto/Allyas/internal/infra/shell"
-	"github.com/Prettyletto/Allyas/internal/infra/storage"
-	"github.com/Prettyletto/Allyas/internal/shared/utils"
 	"github.com/google/uuid"
+	"github.com/prettyletto/allyas/internal/app/stats"
+	"github.com/prettyletto/allyas/internal/domain/models"
+	"github.com/prettyletto/allyas/internal/infra/shell"
+	"github.com/prettyletto/allyas/internal/infra/storage"
+	"github.com/prettyletto/allyas/internal/shared/utils"
 )
 
 type CreateInput struct {
@@ -62,12 +62,12 @@ func createAlias(in CreateInput) (CreateOutput, error) {
 	}
 
 	store.Aliases = append(store.Aliases, *alias)
+	if err := storage.SaveStore(in.StorePath, store); err != nil {
+		return CreateOutput{}, fmt.Errorf("save store: %w", err)
+	}
 	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell, cfg.AliasMode)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
 		return CreateOutput{}, fmt.Errorf("save source: %w", err)
-	}
-	if err := storage.SaveStore(in.StorePath, store); err != nil {
-		return CreateOutput{}, fmt.Errorf("save store: %w", err)
 	}
 
 	if cfg.AliasMode == models.Tracked {

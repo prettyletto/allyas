@@ -5,11 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/app/stats"
-	"github.com/Prettyletto/Allyas/internal/domain/models"
-	"github.com/Prettyletto/Allyas/internal/infra/shell"
-	"github.com/Prettyletto/Allyas/internal/infra/storage"
 	"github.com/google/uuid"
+	"github.com/prettyletto/allyas/internal/app/stats"
+	"github.com/prettyletto/allyas/internal/domain/models"
+	"github.com/prettyletto/allyas/internal/infra/shell"
+	"github.com/prettyletto/allyas/internal/infra/storage"
 )
 
 type ConflictMode string
@@ -95,14 +95,13 @@ func Run(in ImportInput) (ImportOutput, error) {
 		return out, nil
 	}
 
-	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell, cfg.AliasMode)
-
-	if err := storage.SaveSource(in.SourcePath, source); err != nil {
-		return out, fmt.Errorf("save source: %w", err)
-	}
-
 	if err := storage.SaveStore(in.StorePath, store); err != nil {
 		return out, fmt.Errorf("save store: %w", err)
+	}
+
+	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell, cfg.AliasMode)
+	if err := storage.SaveSource(in.SourcePath, source); err != nil {
+		return out, fmt.Errorf("save source: %w", err)
 	}
 
 	return out, nil

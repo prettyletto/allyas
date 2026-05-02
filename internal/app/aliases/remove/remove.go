@@ -5,10 +5,10 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/domain/models"
-	"github.com/Prettyletto/Allyas/internal/infra/shell"
-	"github.com/Prettyletto/Allyas/internal/infra/storage"
-	"github.com/Prettyletto/Allyas/internal/shared/text"
+	"github.com/prettyletto/allyas/internal/domain/models"
+	"github.com/prettyletto/allyas/internal/infra/shell"
+	"github.com/prettyletto/allyas/internal/infra/storage"
+	"github.com/prettyletto/allyas/internal/shared/text"
 )
 
 type InputRemove struct {
@@ -51,12 +51,12 @@ func RemoveByName(in InputRemove) (OutputRemove, error) {
 		return OutputRemove{}, fmt.Errorf("theres no alias named: %s", normName)
 	}
 
+	if err := storage.SaveStore(in.StorePath, store); err != nil {
+		return OutputRemove{}, fmt.Errorf("save store: %w", err)
+	}
 	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell, cfg.AliasMode)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
 		return OutputRemove{}, fmt.Errorf("save source: %w", err)
-	}
-	if err := storage.SaveStore(in.StorePath, store); err != nil {
-		return OutputRemove{}, fmt.Errorf("save store: %w", err)
 	}
 	return OutputRemove{Name: normName, Message: fmt.Sprintf("alias %s removed with success", in.Name)}, nil
 
@@ -89,12 +89,12 @@ func RemoveByGroup(in InputRemove) (OutputRemove, error) {
 	}
 
 	store.Aliases = newAliases
+	if err := storage.SaveStore(in.StorePath, store); err != nil {
+		return OutputRemove{}, fmt.Errorf("save store: %w", err)
+	}
 	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell, cfg.AliasMode)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
 		return OutputRemove{}, fmt.Errorf("save source: %w", err)
-	}
-	if err := storage.SaveStore(in.StorePath, store); err != nil {
-		return OutputRemove{}, fmt.Errorf("save store: %w", err)
 	}
 	return OutputRemove{Group: normGroup, Message: fmt.Sprintf("group %s removed with success, removed aliases:%d", in.Group, match)}, nil
 

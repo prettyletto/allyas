@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	importapp "github.com/Prettyletto/Allyas/internal/app/imports"
+	importapp "github.com/prettyletto/allyas/internal/app/imports"
 )
 
 type ImportCommand struct{}
@@ -50,9 +50,12 @@ func parseImportArgs(args []string) (importapp.ImportInput, error) {
 				return in, fmt.Errorf("%s requires a value ", a)
 			}
 			in.OnConflict = importapp.ConflictMode(args[i+1])
+			if in.OnConflict != importapp.ConflictSkip && in.OnConflict != importapp.ConflictFail {
+				return in, fmt.Errorf("invalid conflict mode %q, expected skip or fail", args[i+1])
+			}
 			i++
 		default:
-			return in, fmt.Errorf("unkown arg: %s", args[i])
+			return in, fmt.Errorf("unknown arg: %s", args[i])
 		}
 	}
 	return in, nil

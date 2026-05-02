@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	createapp "github.com/Prettyletto/Allyas/internal/app/aliases/create"
-	"github.com/Prettyletto/Allyas/internal/infra/shell"
+	createapp "github.com/prettyletto/allyas/internal/app/aliases/create"
+	"github.com/prettyletto/allyas/internal/infra/shell"
 )
 
 type createInput struct {
@@ -31,7 +31,7 @@ func parseCreate(args []string) (createInput, createFlags, error) {
 	in.Command = args[1]
 
 	if in.Name == "" || in.Command == "" {
-		return in, fl, fmt.Errorf("name and comand are required")
+		return in, fl, fmt.Errorf("name and command are required")
 	}
 
 	i := 2
@@ -62,7 +62,7 @@ func parseCreate(args []string) (createInput, createFlags, error) {
 			fl.Tags = appendUniqueTags(fl.Tags, tags)
 			i += 2
 		default:
-			return in, fl, fmt.Errorf("unkown arg: %s", a)
+			return in, fl, fmt.Errorf("unknown arg: %s", a)
 		}
 
 	}

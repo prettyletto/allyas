@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/domain/models"
+	"github.com/prettyletto/allyas/internal/domain/models"
 )
 
 func RenderSource(store models.Store, defaultGroup, shellName string, aliasMode models.AliasMode) string {

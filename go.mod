@@ -1,4 +1,4 @@
-module github.com/Prettyletto/Allyas
+module github.com/prettyletto/allyas
 
 go 1.24.0
 

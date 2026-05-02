@@ -5,7 +5,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/Prettyletto/Allyas/internal/domain/models"
+	"github.com/prettyletto/allyas/internal/domain/models"
 )
 
 func LoadStats(path string) (models.StatsFile, error) {
@@ -42,9 +42,5 @@ func SaveStats(path string, stats models.StatsFile) error {
 	if err != nil {
 		return err
 	}
-	if _, err := EnsureAppConfigDir() ; err != nil{
-		return err
-	}
-
-	return os.WriteFile(path, data, WritePerm)
+	return writeFileAtomic(path, data, WritePerm)
 }

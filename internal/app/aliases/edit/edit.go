@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Prettyletto/Allyas/internal/domain/models"
-	"github.com/Prettyletto/Allyas/internal/infra/shell"
-	"github.com/Prettyletto/Allyas/internal/infra/storage"
-	"github.com/Prettyletto/Allyas/internal/shared/utils"
+	"github.com/prettyletto/allyas/internal/domain/models"
+	"github.com/prettyletto/allyas/internal/infra/shell"
+	"github.com/prettyletto/allyas/internal/infra/storage"
+	"github.com/prettyletto/allyas/internal/shared/utils"
 )
 
 type EditInput struct {
@@ -85,12 +85,12 @@ func editAlias(in EditInput) (EditOutput, error) {
 	newAlias.UpdatedAt = time.Now()
 	store.Aliases[matchIndex] = newAlias
 
+	if err := storage.SaveStore(in.StorePath, store); err != nil {
+		return EditOutput{}, fmt.Errorf("save store: %w", err)
+	}
 	source := shell.RenderSource(store, cfg.DefaultGroup, cfg.Shell, cfg.AliasMode)
 	if err := storage.SaveSource(in.SourcePath, source); err != nil {
 		return EditOutput{}, fmt.Errorf("save source: %w", err)
-	}
-	if err := storage.SaveStore(in.StorePath, store); err != nil {
-		return EditOutput{}, fmt.Errorf("save store: %w", err)
 	}
 
 	return EditOutput{ID: newAlias.ID, Name: newAlias.Name}, nil

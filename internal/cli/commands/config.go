@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	appconfig "github.com/Prettyletto/Allyas/internal/app/config"
-	"github.com/Prettyletto/Allyas/internal/infra/storage"
+	appconfig "github.com/prettyletto/allyas/internal/app/config"
+	"github.com/prettyletto/allyas/internal/infra/storage"
 )
 
 type ConfigCommand struct{}

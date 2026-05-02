@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/app/aliases/list"
+	"github.com/prettyletto/allyas/internal/app/aliases/list"
 )
 
 type TerminalInfo struct {

@@ -3,8 +3,8 @@ package bootstrap
 import (
 	"fmt"
 
-	"github.com/Prettyletto/Allyas/internal/infra/shell"
-	"github.com/Prettyletto/Allyas/internal/infra/storage"
+	"github.com/prettyletto/allyas/internal/infra/shell"
+	"github.com/prettyletto/allyas/internal/infra/storage"
 )
 
 type InstallInput struct {

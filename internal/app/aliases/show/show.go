@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/domain/models"
-	"github.com/Prettyletto/Allyas/internal/infra/storage"
-	"github.com/Prettyletto/Allyas/internal/shared/datetime"
+	"github.com/prettyletto/allyas/internal/domain/models"
+	"github.com/prettyletto/allyas/internal/infra/storage"
+	"github.com/prettyletto/allyas/internal/shared/datetime"
 )
 
 type ShowInput struct {

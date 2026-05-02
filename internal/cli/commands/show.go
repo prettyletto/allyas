@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	showapp "github.com/Prettyletto/Allyas/internal/app/aliases/show"
+	showapp "github.com/prettyletto/allyas/internal/app/aliases/show"
 )
 
 type ShowCommand struct{}

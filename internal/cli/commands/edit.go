@@ -3,8 +3,8 @@ package commands
 import (
 	"fmt"
 
-	"github.com/Prettyletto/Allyas/internal/app/aliases/edit"
-	"github.com/Prettyletto/Allyas/internal/infra/shell"
+	"github.com/prettyletto/allyas/internal/app/aliases/edit"
+	"github.com/prettyletto/allyas/internal/infra/shell"
 )
 
 type editInput struct {
@@ -68,7 +68,7 @@ func parseEdit(args []string) (editInput, error) {
 			in.Tags = appendUniqueTags(in.Tags, tags)
 			i += 2
 		default:
-			return in, fmt.Errorf("unkown arg: %s", a)
+			return in, fmt.Errorf("unknown arg: %s", a)
 		}
 	}
 

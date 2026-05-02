@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Prettyletto/Allyas/internal/app/stats"
+	"github.com/prettyletto/allyas/internal/app/stats"
 )
 
 type RecordCommand struct{}

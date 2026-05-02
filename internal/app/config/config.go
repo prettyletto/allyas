@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/domain/models"
-	"github.com/Prettyletto/Allyas/internal/infra/shell"
-	"github.com/Prettyletto/Allyas/internal/infra/storage"
+	"github.com/prettyletto/allyas/internal/domain/models"
+	"github.com/prettyletto/allyas/internal/infra/shell"
+	"github.com/prettyletto/allyas/internal/infra/storage"
 )
 
 type SetInput struct {
@@ -66,7 +66,7 @@ func Set(in SetInput) (models.Config, error) {
 		}
 		cfg.ConfirmBeforeWrite = v
 	default:
-		return cfg, fmt.Errorf("unkown config key %q", in.Key)
+		return cfg, fmt.Errorf("unknown config key %q", in.Key)
 	}
 
 	if err := storage.SaveConfig(in.ConfigPath, cfg); err != nil {

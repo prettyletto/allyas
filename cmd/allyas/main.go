@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Prettyletto/Allyas/internal/app/dispatch"
-	"github.com/Prettyletto/Allyas/internal/cli/commands"
+	"github.com/prettyletto/allyas/internal/app/dispatch"
+	"github.com/prettyletto/allyas/internal/cli/commands"
 )
+
+var version = "dev"
 
 func main() {
 	cmds := []commands.Command{}
@@ -41,6 +43,8 @@ func main() {
 	d.Register(mode)
 	importCmd := commands.NewImportCommand()
 	d.Register(importCmd)
+	versionCmd := commands.NewVersionCommand(version)
+	d.Register(versionCmd)
 
 	ctx, err := buildCommandContext()
 	if err != nil {

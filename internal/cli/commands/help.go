@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/shared/text"
+	"github.com/prettyletto/allyas/internal/shared/text"
 )
 
 type HelpCommand struct {

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/Prettyletto/Allyas/internal/domain/models"
+	"github.com/prettyletto/allyas/internal/domain/models"
 )
 
 func LoadStore(path string) (models.Store, error) {
@@ -31,11 +31,7 @@ func SaveStore(path string, store models.Store) error {
 	if err != nil {
 		return err
 	}
-	if _, err := EnsureAppConfigDir(); err != nil {
-		return err
-	}
-
-	if err := os.WriteFile(path, data, WritePerm); err != nil {
+	if err := writeFileAtomic(path, data, WritePerm); err != nil {
 		return err
 	}
 

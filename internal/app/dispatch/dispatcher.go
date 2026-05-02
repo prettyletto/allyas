@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/cli/commands"
-	"github.com/Prettyletto/Allyas/internal/shared/text"
+	"github.com/prettyletto/allyas/internal/cli/commands"
+	"github.com/prettyletto/allyas/internal/shared/text"
 )
 
 type ErrUnknownCommand struct {

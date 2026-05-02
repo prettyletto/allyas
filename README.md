@@ -54,6 +54,12 @@ Install globally:
 sudo make install
 ```
 
+For package-style installs, override the prefix:
+
+```sh
+make DESTDIR="$pkgdir" PREFIX=/usr install
+```
+
 The binary name is:
 
 ```sh
@@ -337,6 +343,7 @@ list     list [--compact|--full] [--description] [--dates] [--group G] [--tags T
 mode     mode [plain|tracked]
 remove   remove <name>|--group G
 show     show <name>
+version  version
 ```
 
 `__record` is an internal command used by tracked mode and is not meant to be called by hand.
@@ -408,9 +415,9 @@ Small shared helpers such as name normalization and date formatting.
 
 For a future AUR package or Omarchy setup, the useful separation is:
 
-- package installs the `allyas` binary
+- package installs the `allyas` binary to `/usr/bin/allyas`
 - user runs `allyas init`
 - user runs `allyas install --shell zsh --auto` or adds the manual block
-- user data stays in the user config directory
+- user data stays in `~/.config/allyas`
 
-The package should not own or overwrite a user's shell rc file directly. Allyas already has an explicit install command for that user-level step.
+The package should not run `allyas init`, create user config, or own or overwrite a user's shell rc file directly. Allyas already has an explicit install command for that user-level step.

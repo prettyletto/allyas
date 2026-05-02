@@ -5,9 +5,9 @@ import (
 	"os"
 	"strings"
 
-	appList "github.com/Prettyletto/Allyas/internal/app/aliases/list"
-	"github.com/Prettyletto/Allyas/internal/cli/ui"
-	appPrinter "github.com/Prettyletto/Allyas/internal/cli/ui/printer"
+	appList "github.com/prettyletto/allyas/internal/app/aliases/list"
+	"github.com/prettyletto/allyas/internal/cli/ui"
+	appPrinter "github.com/prettyletto/allyas/internal/cli/ui/printer"
 	"golang.org/x/term"
 )
 
@@ -87,7 +87,7 @@ func parseListArgs(args []string) (listFlags, error) {
 			fl.Sort = sortValue
 			i++
 		default:
-			return fl, fmt.Errorf("unkown arg: %s", a)
+			return fl, fmt.Errorf("unknown arg: %s", a)
 		}
 	}
 

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/app/aliases/remove"
-	"github.com/Prettyletto/Allyas/internal/infra/shell"
+	"github.com/prettyletto/allyas/internal/app/aliases/remove"
+	"github.com/prettyletto/allyas/internal/infra/shell"
 )
 
 type RemoveCommand struct{}
@@ -33,7 +33,7 @@ func parseRemove(args []string) (removeInput, error) {
 			in.Group = args[i+1]
 			i++
 		case strings.HasPrefix(a, "-"):
-			return in, fmt.Errorf("unkown flag:%s", a)
+			return in, fmt.Errorf("unknown flag: %s", a)
 		default:
 			in.Name = a
 		}

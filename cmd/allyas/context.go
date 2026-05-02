@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/Prettyletto/Allyas/internal/cli/commands"
-	"github.com/Prettyletto/Allyas/internal/infra/storage"
+	"github.com/prettyletto/allyas/internal/cli/commands"
+	"github.com/prettyletto/allyas/internal/infra/storage"
 )
 
 func buildCommandContext() (*commands.CommandContext, error) {

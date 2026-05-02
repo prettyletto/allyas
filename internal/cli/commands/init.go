@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Prettyletto/Allyas/internal/app/bootstrap"
-	"github.com/Prettyletto/Allyas/internal/domain/models"
-	"github.com/Prettyletto/Allyas/internal/infra/shell"
+	"github.com/prettyletto/allyas/internal/app/bootstrap"
+	"github.com/prettyletto/allyas/internal/domain/models"
+	"github.com/prettyletto/allyas/internal/infra/shell"
 )
 
 var ErrCanceled = errors.New("init canceled")
@@ -47,7 +47,7 @@ func parseInitForceTarget(s string) (string, error) {
 	}
 }
 
-func parseInitargs(args []string) (initFlags, error) {
+func parseInitArgs(args []string) (initFlags, error) {
 	var f initFlags
 	f.ForceTargets = map[string]bool{}
 
@@ -88,7 +88,7 @@ func parseInitargs(args []string) (initFlags, error) {
 			i++
 
 		default:
-			return f, fmt.Errorf("unkown arg: %s", a)
+			return f, fmt.Errorf("unknown arg: %s", a)
 		}
 
 	}
@@ -114,7 +114,7 @@ func (c *InitCommand) Description() string {
 }
 
 func (c *InitCommand) Execute(ctx CommandContext, args []string) error {
-	flags, err := parseInitargs(args)
+	flags, err := parseInitArgs(args)
 	if err != nil {
 		return err
 	}
