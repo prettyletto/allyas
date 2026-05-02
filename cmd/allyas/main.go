@@ -21,6 +21,8 @@ func main() {
 	d.Register(help)
 	list := commands.NewListCommand()
 	d.Register(list)
+	show := commands.NewShowCommand()
+	d.Register(show)
 	init := commands.NewInitCommand()
 	d.Register(init)
 	install := commands.NewInstallCommand()
