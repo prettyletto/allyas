@@ -24,7 +24,7 @@ ax() {
 
 	if [ $allyas_status -eq 0 ]; then
 		case "$1" in
-			create|edit|remove|init|import)
+			create|edit|remove|init|import|sync)
 				if [ -f %q ]; then
 					. %q
 				fi

@@ -132,9 +132,32 @@ ax import ~/.aliases
 ax import ~/.aliases --dry-run
 ax import ~/.aliases --group imported
 ax import ~/.aliases --on-conflict fail
+ax import ~/.aliases --on-conflict replace
+ax import ~/.aliases --on-conflict rename
+ax import ~/.aliases --show-warnings
 ```
 
-By default, import conflicts are skipped.
+By default, import conflicts are skipped. Conflict modes:
+
+- `skip`: keep the existing Allyas entry and ignore the imported duplicate.
+- `fail`: stop the import when a duplicate alias name is found.
+- `replace`: keep the existing alias ID and replace its command.
+- `rename`: ask for a new name in an interactive terminal; non-interactive runs use a suffix like `gs_2`.
+
+When `rename` sees an identical existing alias with the same command, it skips that duplicate instead of creating another name.
+
+The importer supports common shell alias and function forms:
+
+```sh
+alias gs='git status'
+alias dc="docker compose"
+foo() { echo hi; }
+function bar() {
+  echo "$HOME"
+}
+```
+
+Unsupported shell syntax is skipped instead of being silently imported incorrectly. By default Allyas prints a compact skipped-line count; use `--show-warnings` to list the line-by-line details.
 
 If your shell rc file still sources the old alias file after Allyas, those old definitions can override Allyas functions. Remove or comment the old source line once import is done.
 
@@ -176,8 +199,32 @@ Supported keys:
 - `alias_mode`
 - `auto_init`
 - `confirm_write`
+- `sync_enabled`
+- `sync_provider`
+- `sync_remote`
+- `sync_branch`
 
 Changing `default_group`, `shell`, or `alias_mode` regenerates the source file.
+
+## Sync
+
+Sync canonical Allyas files through a Git remote:
+
+```sh
+allyas sync setup git@github.com:you/allyas-config.git
+allyas sync
+allyas sync --preview
+allyas sync --pull
+allyas sync --push
+allyas sync --force-pull
+allyas sync --force-push
+```
+
+Sync uses `provider=git` in `sync_config`. It stores a managed repository under `~/.config/allyas/sync`, syncs `config.json` and `store.json`, and regenerates `aliases.sh` locally after pulling. Generated files, hooks, and stats are not synced.
+
+If the remote already contains Allyas sync files, `allyas sync setup <remote>` restores those files locally and keeps the remote as the source of truth. If the remote is empty, setup exports the current local config and store.
+
+Plain `allyas sync` pulls remote changes and then pushes the resulting canonical files. If Git cannot merge cleanly, sync stops instead of overwriting local data; use `--force-pull` or `--force-push` only when you intentionally want one side to win.
 
 ## Commands
 
@@ -186,13 +233,14 @@ config   config [show|get <key>|set <key> <value>]
 create   create <name> <command> [--group G] [--description D] [--tag T]
 edit     edit <current-name> [--name N] [--command C] [--description D] [--group G] [--tags T]
 help     help [command]
-import   import <file> [--group G] [--dry-run] [--on-conflict skip|fail]
+import   import <file> [--group G] [--dry-run] [--on-conflict skip|fail|replace|rename] [--show-warnings]
 init     init [--force|-f [config|store|source|hook|stats]] [--shell bash|zsh] [--alias-mode plain|tracked]
 install  install [--shell bash|zsh] [--manual|--auto]
 list     list [--compact|--full] [--description] [--dates] [--group G] [--tags T] [--sort name|group|dates|usage|recent]
 mode     mode [plain|tracked]
 remove   remove <name>|--group G
 show     show <name>
+sync     sync [setup <git-remote>] [--branch B] [--preview|--pull|--push|--force-pull|--force-push]
 version  version
 ```
 

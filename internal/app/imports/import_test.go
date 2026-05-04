@@ -91,6 +91,128 @@ func TestRunFailsOnConflict(t *testing.T) {
 	}
 }
 
+func TestRunReplacesConflicts(t *testing.T) {
+	existing := models.Alias{ID: "existing", Name: "gs", Command: "git status", Group: "git"}
+	paths := setupImportFiles(t, []models.Alias{existing})
+	aliasFile := writeAliasFile(t, paths.dir, "alias gs='git status --short'\n")
+
+	out, err := Run(ImportInput{
+		ConfigPath: paths.config,
+		StorePath:  paths.store,
+		SourcePath: paths.source,
+		StatsPath:  paths.stats,
+		FilePath:   aliasFile,
+		OnConflict: ConflictReplace,
+	})
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	if out.Imported != 0 || out.Replaced != 1 || out.Skipped != 0 {
+		t.Fatalf("output = %#v", out)
+	}
+
+	store, err := storage.LoadStore(paths.store)
+	if err != nil {
+		t.Fatalf("LoadStore returned error: %v", err)
+	}
+	if len(store.Aliases) != 1 || store.Aliases[0].ID != "existing" || store.Aliases[0].Command != "git status --short" {
+		t.Fatalf("store = %#v", store)
+	}
+}
+
+func TestRunRenamesConflicts(t *testing.T) {
+	existing := models.Alias{ID: "existing", Name: "gs", Command: "git status", Group: "git"}
+	paths := setupImportFiles(t, []models.Alias{existing})
+	aliasFile := writeAliasFile(t, paths.dir, "alias gs='git status --short'\n")
+
+	out, err := Run(ImportInput{
+		ConfigPath: paths.config,
+		StorePath:  paths.store,
+		SourcePath: paths.source,
+		StatsPath:  paths.stats,
+		FilePath:   aliasFile,
+		OnConflict: ConflictRename,
+	})
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	if out.Imported != 1 || out.Renamed != 1 || out.Skipped != 0 {
+		t.Fatalf("output = %#v", out)
+	}
+
+	store, err := storage.LoadStore(paths.store)
+	if err != nil {
+		t.Fatalf("LoadStore returned error: %v", err)
+	}
+	if len(store.Aliases) != 2 || store.Aliases[1].Name != "gs_2" {
+		t.Fatalf("store = %#v", store)
+	}
+}
+
+func TestRunRenameCanAskForName(t *testing.T) {
+	existing := models.Alias{ID: "existing", Name: "gs", Command: "git status", Group: "git"}
+	paths := setupImportFiles(t, []models.Alias{existing})
+	aliasFile := writeAliasFile(t, paths.dir, "alias gs='git status --short'\n")
+
+	out, err := Run(ImportInput{
+		ConfigPath: paths.config,
+		StorePath:  paths.store,
+		SourcePath: paths.source,
+		StatsPath:  paths.stats,
+		FilePath:   aliasFile,
+		OnConflict: ConflictRename,
+		RenameFunc: func(req RenameRequest) (string, error) {
+			if req.OriginalName != "gs" || req.SuggestedName != "gs_2" {
+				t.Fatalf("rename request = %#v", req)
+			}
+			return "gst", nil
+		},
+	})
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	if out.Imported != 1 || out.Renamed != 1 {
+		t.Fatalf("output = %#v", out)
+	}
+
+	store, err := storage.LoadStore(paths.store)
+	if err != nil {
+		t.Fatalf("LoadStore returned error: %v", err)
+	}
+	if len(store.Aliases) != 2 || store.Aliases[1].Name != "gst" {
+		t.Fatalf("store = %#v", store)
+	}
+}
+
+func TestRunRenameSkipsIdenticalConflicts(t *testing.T) {
+	existing := models.Alias{ID: "existing", Name: "gs", Command: "git status", Group: "git"}
+	paths := setupImportFiles(t, []models.Alias{existing})
+	aliasFile := writeAliasFile(t, paths.dir, "alias gs='git status'\n")
+
+	out, err := Run(ImportInput{
+		ConfigPath: paths.config,
+		StorePath:  paths.store,
+		SourcePath: paths.source,
+		StatsPath:  paths.stats,
+		FilePath:   aliasFile,
+		OnConflict: ConflictRename,
+	})
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	if out.Imported != 0 || out.Renamed != 0 || out.Skipped != 1 {
+		t.Fatalf("output = %#v", out)
+	}
+
+	store, err := storage.LoadStore(paths.store)
+	if err != nil {
+		t.Fatalf("LoadStore returned error: %v", err)
+	}
+	if len(store.Aliases) != 1 || store.Aliases[0].Name != "gs" {
+		t.Fatalf("store = %#v", store)
+	}
+}
+
 func TestRunDryRunDoesNotWriteStoreOrSource(t *testing.T) {
 	paths := setupImportFiles(t, nil)
 	aliasFile := writeAliasFile(t, paths.dir, "alias gs='git status'\n")

@@ -37,7 +37,7 @@ func AskInput(in io.Reader, out io.Writer, question, suffix, defaultValue string
 	if err != nil && err != io.EOF {
 		return "", err
 	}
-	s := strings.ToLower(strings.TrimSpace(line))
+	s := strings.TrimSpace(line)
 
 	if s == "" {
 		return defaultValue, nil

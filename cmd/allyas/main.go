@@ -43,6 +43,8 @@ func main() {
 	d.Register(mode)
 	importCmd := commands.NewImportCommand()
 	d.Register(importCmd)
+	syncCmd := commands.NewSyncCommand()
+	d.Register(syncCmd)
 	versionCmd := commands.NewVersionCommand(version)
 	d.Register(versionCmd)
 

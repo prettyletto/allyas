@@ -125,7 +125,7 @@ func TestImportCommandExecuteWritesAndDryRuns(t *testing.T) {
 			t.Fatalf("import dry-run Execute returned error: %v", err)
 		}
 	})
-	assertContains(t, out, "Imported 1 entries, skipped 0")
+	assertContains(t, out, "Imported 1 entries, replaced 0, renamed 0, skipped 0")
 
 	store, err := storage.LoadStore(ctx.StorePath)
 	if err != nil {
@@ -140,7 +140,7 @@ func TestImportCommandExecuteWritesAndDryRuns(t *testing.T) {
 			t.Fatalf("import Execute returned error: %v", err)
 		}
 	})
-	assertContains(t, out, "Imported 1 entries, skipped 0")
+	assertContains(t, out, "Imported 1 entries, replaced 0, renamed 0, skipped 0")
 
 	store, err = storage.LoadStore(ctx.StorePath)
 	if err != nil {
@@ -149,6 +149,31 @@ func TestImportCommandExecuteWritesAndDryRuns(t *testing.T) {
 	if len(store.Aliases) != 1 || store.Aliases[0].Name != "ll" || store.Aliases[0].Group != "imported" {
 		t.Fatalf("aliases after import = %#v", store.Aliases)
 	}
+}
+
+func TestImportCommandSummarizesWarningsByDefault(t *testing.T) {
+	ctx := initializedCommandContext(t)
+	aliasFile := filepath.Join(t.TempDir(), "aliases")
+	if err := os.WriteFile(aliasFile, []byte("export PATH=$PATH:/tmp\nalias ll='ls -la'\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile returned error: %v", err)
+	}
+
+	out := captureStdout(t, func() {
+		if err := NewImportCommand().Execute(ctx, []string{aliasFile, "--dry-run"}); err != nil {
+			t.Fatalf("import Execute returned error: %v", err)
+		}
+	})
+	assertContains(t, out, "Skipped 1 unsupported or incomplete lines. Use --show-warnings to list them.")
+	if strings.Contains(out, "line 1:") {
+		t.Fatalf("default import output listed warning details:\n%s", out)
+	}
+
+	out = captureStdout(t, func() {
+		if err := NewImportCommand().Execute(ctx, []string{aliasFile, "--dry-run", "--show-warnings"}); err != nil {
+			t.Fatalf("import Execute returned error: %v", err)
+		}
+	})
+	assertContains(t, out, "line 1: export PATH=$PATH:/tmp")
 }
 
 func TestReadOnlyExposedCommands(t *testing.T) {
@@ -179,6 +204,22 @@ func TestReadOnlyExposedCommands(t *testing.T) {
 	})
 	if strings.TrimSpace(out) != string(models.Plain) {
 		t.Fatalf("mode output = %q, want plain", out)
+	}
+
+	out = captureStdout(t, func() {
+		if err := NewConfigCommand().Execute(ctx, []string{"set", "sync_provider", "git"}); err != nil {
+			t.Fatalf("config sync_provider Execute returned error: %v", err)
+		}
+	})
+	assertContains(t, out, "Updated config sync_provider=git")
+
+	out = captureStdout(t, func() {
+		if err := NewConfigCommand().Execute(ctx, []string{"get", "sync_provider"}); err != nil {
+			t.Fatalf("config get sync_provider returned error: %v", err)
+		}
+	})
+	if strings.TrimSpace(out) != "git" {
+		t.Fatalf("sync_provider output = %q, want git", out)
 	}
 }
 

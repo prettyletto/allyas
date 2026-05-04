@@ -4,24 +4,60 @@ import (
 	"testing"
 
 	importapp "github.com/prettyletto/allyas/internal/app/imports"
+	syncapp "github.com/prettyletto/allyas/internal/app/sync"
 	"github.com/prettyletto/allyas/internal/domain/models"
 	"github.com/prettyletto/allyas/internal/infra/shell"
 )
 
 func TestParseImportArgs(t *testing.T) {
-	got, err := parseImportArgs([]string{"aliases.sh", "--group", "git", "--dry-run", "--on-conflict", "fail"})
+	got, err := parseImportArgs([]string{"aliases.sh", "--group", "git", "--dry-run", "--show-warnings", "--on-conflict", "fail"})
 	if err != nil {
 		t.Fatalf("parseImportArgs returned error: %v", err)
 	}
 
-	if got.FilePath != "aliases.sh" || got.Group != "git" || !got.DryRun || got.OnConflict != importapp.ConflictFail {
+	if got.FilePath != "aliases.sh" || got.Group != "git" || !got.DryRun || !got.ShowWarnings || got.OnConflict != importapp.ConflictFail {
 		t.Fatalf("flags = %#v", got)
 	}
 }
 
 func TestParseImportArgsRejectsConflictMode(t *testing.T) {
-	if _, err := parseImportArgs([]string{"aliases.sh", "--on-conflict", "replace"}); err == nil {
+	for _, mode := range []importapp.ConflictMode{
+		importapp.ConflictSkip,
+		importapp.ConflictFail,
+		importapp.ConflictReplace,
+		importapp.ConflictRename,
+	} {
+		if _, err := parseImportArgs([]string{"aliases.sh", "--on-conflict", string(mode)}); err != nil {
+			t.Fatalf("parseImportArgs rejected valid mode %q: %v", mode, err)
+		}
+	}
+
+	if _, err := parseImportArgs([]string{"aliases.sh", "--on-conflict", "bad"}); err == nil {
 		t.Fatal("expected invalid conflict mode error")
+	}
+}
+
+func TestParseSyncArgs(t *testing.T) {
+	got, err := parseSyncArgs([]string{"setup", "git@example.com:me/allyas.git", "--branch", "allyas"})
+	if err != nil {
+		t.Fatalf("parseSyncArgs returned error: %v", err)
+	}
+	if got.Mode != syncapp.ModeSetup || got.Remote != "git@example.com:me/allyas.git" || got.Branch != "allyas" {
+		t.Fatalf("sync args = %#v", got)
+	}
+
+	got, err = parseSyncArgs([]string{"--force-pull"})
+	if err != nil {
+		t.Fatalf("parseSyncArgs force-pull returned error: %v", err)
+	}
+	if got.Mode != syncapp.ModeForcePull {
+		t.Fatalf("Mode = %q, want force-pull", got.Mode)
+	}
+}
+
+func TestParseSyncArgsRejectsCombinedModes(t *testing.T) {
+	if _, err := parseSyncArgs([]string{"--pull", "--push"}); err == nil {
+		t.Fatal("expected combined mode error")
 	}
 }
 

@@ -65,6 +65,24 @@ func Set(in SetInput) (models.Config, error) {
 			return cfg, fmt.Errorf("confirm_write expects true of false")
 		}
 		cfg.ConfirmBeforeWrite = v
+	case "sync_enabled":
+		v, err := strconv.ParseBool(value)
+		if err != nil {
+			return cfg, fmt.Errorf("sync_enabled expects true or false")
+		}
+		cfg.Sync.Enabled = v
+	case "sync_provider":
+		if value != "none" && value != "git" {
+			return cfg, fmt.Errorf("invalid sync_provider %q, expected none or git", value)
+		}
+		cfg.Sync.Provider = value
+	case "sync_remote":
+		cfg.Sync.Remote = value
+	case "sync_branch":
+		if value == "" {
+			return cfg, fmt.Errorf("sync_branch cannot be empty")
+		}
+		cfg.Sync.Branch = value
 	default:
 		return cfg, fmt.Errorf("unknown config key %q", in.Key)
 	}

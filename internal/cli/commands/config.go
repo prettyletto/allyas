@@ -96,6 +96,14 @@ func printConfigValue(path string, key string) error {
 		fmt.Println(cfg.AutoInit)
 	case "confirm_write":
 		fmt.Println(cfg.ConfirmBeforeWrite)
+	case "sync_enabled":
+		fmt.Println(cfg.Sync.Enabled)
+	case "sync_provider":
+		fmt.Println(cfg.Sync.Provider)
+	case "sync_remote":
+		fmt.Println(cfg.Sync.Remote)
+	case "sync_branch":
+		fmt.Println(cfg.Sync.Branch)
 	default:
 		return fmt.Errorf("unknown config key %q", key)
 	}
