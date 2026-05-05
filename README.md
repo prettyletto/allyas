@@ -1,6 +1,6 @@
 # Allyas
 
-Allyas is a local-first Go CLI for managing shell aliases as POSIX functions.
+Allyas is a local-first Go CLI for managing shell aliases as POSIX functions. It is currently beta software.
 
 It stores the canonical data in JSON under `~/.config/allyas`, renders a shell source file, and provides an `ax` shell wrapper that re-sources that file after changes.
 
@@ -23,6 +23,33 @@ gs() {
 
 Tracked mode renders through `allyas__run_tracked` so Allyas can record usage count and last-used time.
 
+## Beta status
+
+Allyas is ready for early testers who are comfortable with command-line tools, shell startup files, and local config files. The core alias workflow is implemented, but the project is still before a stable 1.0 release.
+
+Good beta test areas:
+
+- importing existing alias files with `ax import ~/.aliases --dry-run`
+- creating, editing, listing, and removing aliases with `ax`
+- testing Bash and zsh hook installation
+- trying plain mode and tracked mode
+- testing Git sync with a disposable remote repository
+
+Safety notes:
+
+- Allyas stores user data under `~/.config/allyas` by default.
+- `allyas install --shell <shell> --auto` edits the selected shell rc file.
+- Use `allyas install --shell <shell> --manual` if you prefer to review the shell block before adding it yourself.
+- Use `ax import <file> --dry-run --show-warnings` before importing a real alias file.
+- For sync testing, start with a new empty remote repository until you trust the workflow.
+
+Known beta scope:
+
+- supported shells: Bash and zsh
+- supported package draft: Arch/AUR-style packaging
+- sync provider: Git
+- shell syntax import: common aliases and simple POSIX-style functions, not arbitrary shell programs
+
 ## Install
 
 Requirements:
@@ -35,6 +62,12 @@ Build:
 
 ```sh
 make build
+```
+
+Build a specific version:
+
+```sh
+make build VERSION=0.1.0-beta.1
 ```
 
 Install from source to `/usr/local/bin`:
@@ -94,6 +127,31 @@ ax create gs "git status" --group git
 ```
 
 `ax` calls `allyas` and reloads the generated source file in the current shell session.
+
+## Quick beta test
+
+```sh
+make build
+./allyas init --alias-mode plain
+./allyas install --shell zsh --manual
+```
+
+Add the printed shell block to your shell rc file, restart the shell, then try:
+
+```sh
+ax create gs "git status" --group git
+gs
+ax list --full
+ax show gs
+ax edit gs --command "git status --short"
+ax remove gs
+```
+
+To test import safely:
+
+```sh
+ax import ~/.aliases --dry-run --show-warnings
+```
 
 ## Usage
 

@@ -2,6 +2,7 @@ BINARY_NAME := allyas
 SRC_DIR := ./cmd/allyas
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
+VERSION ?= 0.1.0-beta.1
 
 .DEFAULT_GOAL := all
 
@@ -10,7 +11,7 @@ BINDIR ?= $(PREFIX)/bin
 all: build
 
 build:
-	go build -trimpath -o $(BINARY_NAME) $(SRC_DIR)
+	go build -trimpath -ldflags "-X main.version=$(VERSION)" -o $(BINARY_NAME) $(SRC_DIR)
 
 test:
 	go test ./...

@@ -8,7 +8,7 @@ import (
 	"github.com/prettyletto/allyas/internal/cli/commands"
 )
 
-var version = "dev"
+var version = "0.1.0-beta.1"
 
 func main() {
 	cmds := []commands.Command{}

@@ -1,5 +1,8 @@
 cmd/cmd
 .allyas
+.codex
+.agents/
+allyas
 .AGENTS.md
 AGENTS.md
 *.swp
